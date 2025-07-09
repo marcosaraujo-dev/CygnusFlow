@@ -112,9 +112,8 @@ O projeto contém testes unitários organizados por camada:
 ![image](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![image](https://img.shields.io/badge/Git-E34F26?style=for-the-badge&logo=git&logoColor=white)
 
-### Designer
-![Figma](https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white)
-![Figma](https://img.shields.io/badge/draw.io-%002E3B.svg?style=for-the-badge&logo=draw.io&logoColor=white)
+
+![Drawio](https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white)
 
 ### Testes
 ![xUnit](https://img.shields.io/badge/xUnit-Blue?style=for-the-badge)
@@ -136,14 +135,6 @@ Marcos Araujo - [@linkedIn](https://www.linkedin.com/in/marcosaraujosouza/) - ma
 Project Link: [Projeto_Base_Typescript](https://github.com/marcosaraujo-dev/Projeto_Base_Typescript)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- ACKNOWLEDGMENTS -->
-
-## Agradecimentos
-![image](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)
-![image](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)
-![image](https://img.shields.io/badge/dev.to-0A0A0A?style=for-the-badge&logo=dev.to&logoColor=white)
-
 
 
 -   [XXXXXXX](https://XXXXXX/)
