@@ -153,7 +153,7 @@ Project Link: [Projeto_Base_Typescript](https://github.com/marcosaraujo-dev/Proj
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[contributors-shield]: https://github.com/marcosaraujo-dev/CygnusFlow.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/marcosaraujo-dev/CygnusFlow.svg?style=for-the-badge
 [contributors-url]: https://github.com/marcosaraujo-dev/CygnusFlow/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/marcosaraujo-dev/CygnusFlow.svg?style=for-the-badge
 [forks-url]: https://github.com/marcosaraujo-dev/CygnusFlow/network/members
