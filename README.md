@@ -110,15 +110,15 @@ Project Link: [Projeto_Base_Typescript](https://github.com/marcosaraujo-dev/Proj
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[contributors-shield]: https://img.shields.io/github/contributors/marcosaraujo-dev/Projeto_Base_Typescript.svg?style=for-the-badge
-[contributors-url]: https://github.com/marcosaraujo-dev/Projeto_Base_Typescript/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/marcosaraujo-dev/Projeto_Base_Typescript.svg?style=for-the-badge
-[forks-url]: https://github.com/marcosaraujo-dev/Projeto_Base_Typescript/network/members
-[stars-shield]: https://img.shields.io/github/stars/marcosaraujo-dev/Projeto_Base_Typescript.svg?style=for-the-badge
-[stars-url]: https://github.com/marcosaraujo-dev/Projeto_Base_Typescript/stargazers
-[issues-shield]: https://img.shields.io/github/issues/marcosaraujo-dev/Projeto_Base_Typescript.svg?style=for-the-badge
-[issues-url]: https://github.com/marcosaraujo-dev/Projeto_Base_Typescript/issues
-[license-shield]: https://img.shields.io/github/license/marcosaraujo-dev/Projeto_Base_Typescript.svg?style=for-the-badge
-[license-url]: https://github.com/marcosaraujo-dev/Projeto_Base_Typescript/blob/master/LICENSE.txt
+[contributors-shield]: https://github.com/marcosaraujo-dev/CygnusFlow.svg?style=for-the-badge
+[contributors-url]: https://github.com/marcosaraujo-dev/CygnusFlow/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/marcosaraujo-dev/CygnusFlow.svg?style=for-the-badge
+[forks-url]: https://github.com/marcosaraujo-dev/CygnusFlow/network/members
+[stars-shield]: https://img.shields.io/github/stars/marcosaraujo-dev/CygnusFlow.svg?style=for-the-badge
+[stars-url]: https://github.com/marcosaraujo-dev/CygnusFlow/stargazers
+[issues-shield]: https://img.shields.io/github/issues/marcosaraujo-dev/CygnusFlow.svg?style=for-the-badge
+[issues-url]: https://github.com/marcosaraujo-dev/CygnusFlow/issues
+[license-shield]: https://img.shields.io/github/license/marcosaraujo-dev/CygnusFlow.svg?style=for-the-badge
+[license-url]: https://github.com/marcosaraujo-dev/CygnusFlow/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/marcosaraujosouza/
