@@ -8,64 +8,104 @@
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 
-  <p align="center">
-  <img src="images/logoCygnusTech.png" width="50%" \>
-  </p>
+<p align="center">
+  <img src="images/CygnusFlow.png" width="50%" />
+</p>
 
-<h1 align="center">Projeto XXX</h3>
+<h1 align="center">CygnusFlow</h1>
+<h4 align="center"><em>Fluxo inteligente, gestão eficiente</em></h4>
 
 <!-- ABOUT THE PROJECT -->
 
 ## Sobre o Projeto
 
-Projeto criado para aprendizagem da linguagem Typescript, seguindo aulas da plataforma DevSamurai.
-Com o intuito de aprendizado não foram feitas modificações nas funcionalidades além do que foi apresentado no treinamento.
-O intuito do projeto é criar uma lista de tarefas onde o usuário pode adicionar, excluir ou marcar a tarefa como finalizada.
+O **CygnusFlow** é uma plataforma modular de gestão de projetos voltada para equipes técnicas, líderes de produto e stakeholders. Ele permite organizar e acompanhar o ciclo de vida completo de um projeto — do planejamento à execução — com foco em **transparência, produtividade e controle**.
 
-<h4>Title</h4>
-Description
-<p align="center>
-<img src="src/images/xxx.jpg" \>
-  </p>
-<br/>
+O projeto segue os princípios da **Clean Architecture**, sendo adaptável para uso em ambientes desktop (via WinForms) e web (via API + frontend React).
 
+
+## 📐 Arquitetura
+
+O backend foi desenvolvido em **.NET 9** com separação clara por camadas:
+
+Cada camada é isolada e respeita o princípio de inversão de dependência, tornando o projeto altamente testável, escalável e sustentável.
+
+---
+
+## 🧠 Funcionalidades
+
+- 📋 Cadastro e edição de projetos e tarefas
+- 🧑‍💼 Controle de acesso por papéis (Admin, P.O., Dev, Viewer)
+- 📅 Gantt Chart com comparativos (Planejado vs Realizado)
+- 📊 Relatórios gerenciais e analíticos
+- 🔔 Notificações de prazos
+- 📈 Dashboard com indicadores (burndown, atrasos, confiabilidade)
+- 💬 Histórico e anotações por projeto
+- 📤 Exportação para Excel/PDF
+- 🔐 Autenticação JWT
+- 💾 Suporte a múltiplos bancos: SQL Server, PostgreSQL, SQLite
+
+---
+
+## 🧪 Testes
+
+O projeto contém testes unitários organizados por camada:
+
+- `CygnusFlow.Domain`: Validações e regras puras
+- `CygnusFlow.Application`: Casos de uso, regras de fluxo
+- `CygnusFlow.Infrastructure`: Repositórios mockados
+- Frameworks: **xUnit**, **Moq**, **FluentAssertions**
+
+
+---
+
+## 🛡️ Segurança
+
+- Autenticação com JWT
+- Armazenamento seguro de senhas (hash + salt)
+- Proteções contra SQL Injection e XSS
+- Comunicação segura via TLS
+- Controle de acesso por perfil e escopo
+
+---
+
+## 📈 Roadmap (Resumo)
+
+| Fase | Objetivo                                     | Status   |
+|------|----------------------------------------------|----------|
+| 1    | MVP Desktop com WinForms                     | ✅ Em andamento |
+| 2    | Módulo de permissões e relatórios            | 🔜 Em planejamento |
+| 3    | Dashboard completo e indicadores gerenciais  | 🔜 Futuro |
+| 4    | Criação da API e frontend em React           | 🔜 Futuro |
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 # Tecnologias
 
 
-### Languages
+
+### Linguagens
 ![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=c-sharp&logoColor=white)
-![image](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![image](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=white)
-![image](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 
 ### Frameworks, Platforms and Libraries
 ![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
-![Blazor](https://img.shields.io/badge/blazor-%235C2D91.svg?style=for-the-badge&logo=blazor&logoColor=white)
+![WinForms](https://img.shields.io/badge/WinForms-007ACC?style=for-the-badge&logo=windows&logoColor=white)
 ![image](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![image](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![image](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
-![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
-![Vue.js](https://img.shields.io/badge/vuejs-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D)
 ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
-![image](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
 ![image](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)
 ![image](https://img.shields.io/badge/styled--components-DB7093?style=for-the-badge&logo=styled-components&logoColor=white)
 ![image](https://img.shields.io/badge/Material--UI-0081CB?style=for-the-badge&logo=material-ui&logoColor=white)
-![RabbitMQ](https://img.shields.io/badge/Rabbitmq-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
 ![Insomnia](https://img.shields.io/badge/Insomnia-black?style=for-the-badge&logo=insomnia&logoColor=5849BE)
 ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
 
 
-### Databases
-![image](https://img.shields.io/badge/Redis-D9281A?style=for-the-badge&logo=redis&logoColor=white)
-![image](https://img.shields.io/badge/Microsoft%20SQL%20Server-CC2927?style=for-the-badge&logo=microsoft%20sql%20server&logoColor=white)
-![image](https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white)
-![image](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
-![image](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+### Banco de Dados
+![SQL Server](https://img.shields.io/badge/Microsoft%20SQL%20Server-CC2927?style=for-the-badge&logo=microsoft%20sql%20server&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
 
 ![image](https://img.shields.io/badge/Microsoft_Azure-0089D6?style=for-the-badge&logo=microsoft-azure&logoColor=white)
 
@@ -76,17 +116,20 @@ Description
 ![Figma](https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white)
 ![Figma](https://img.shields.io/badge/draw.io-%002E3B.svg?style=for-the-badge&logo=draw.io&logoColor=white)
 
-### Testing
+### Testes
+![xUnit](https://img.shields.io/badge/xUnit-Blue?style=for-the-badge)
+![Moq](https://img.shields.io/badge/Moq-LightGray?style=for-the-badge)
+![FluentAssertions](https://img.shields.io/badge/FluentAssertions-purple?style=for-the-badge)
+
 ![cypress](https://img.shields.io/badge/-cypress-%23E5E5E5?style=for-the-badge&logo=cypress&logoColor=058a5e)
 ![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)
 ![NestJS](https://img.shields.io/badge/nestjs-%23E0234E.svg?style=for-the-badge&logo=nestjs&logoColor=white)
-![JUnit](https://img.shields.io/badge/Junit-25A162?style=for-the-badge&logo=junit5&logoColor=white)
-![MSTest](https://img.shields.io/badge/MSTest-234a4a4a?style=for-the-badge&logo=MSTest&logoColor=white)
-![NUnit](https://img.shields.io/badge/NUnit-16B7FB?style=for-the-badge&logo=NUnit&logoColor=white)
+
 
 <!-- CONTACT -->
 
 ## Contatos
+---
 
 Marcos Araujo - [@linkedIn](https://www.linkedin.com/in/marcosaraujosouza/) - marcos.araso@hotmail.com
 
