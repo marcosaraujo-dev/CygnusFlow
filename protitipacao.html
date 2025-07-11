@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protótipos - Sistema de Gestão de Projetos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+/* Modern Navbar */
+.navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+
+        /* Logo */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a202c;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #184194 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        /* Navigation Menu */
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            list-style: none;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 12px;
+            color: #4a5568;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #184194 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(12, 31, 117, 0.3);
+        }
+
+        .nav-icon {
+            font-size: 16px;
+        }
+
+        /* User Profile */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .notifications {
+            position: relative;
+            padding: 8px;
+            color: #4a5568;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .notifications:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #184194 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #1a202c;
+            font-size: 14px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .mobile-toggle span {
+            width: 24px;
+            height: 2px;
+            background: #4a5568;
+            border-radius: 1px;
+            transition: all 0.3s ease;
+        }
+
+        /* Content Area */
+        .content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            background: white;
+            border-radius: 20px;
+            margin-top: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .nav-menu {
+                position: fixed;
+                top: 72px;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 20px;
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-menu.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .nav-link {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 16px 20px;
+            }
+
+            .mobile-toggle {
+                display: flex;
+            }
+
+            .user-info {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-container {
+                padding: 0 16px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            .logo-icon {
+                width: 36px;
+                height: 36px;
+            }
+
+            .user-avatar {
+                width: 34px;
+                height: 34px;
+            }
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .prototype-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .screen {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .screen-header {
+            background: #184194;
+            color: white;
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .screen-content {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            color: #4a5568;
+            font-weight: 500;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #184194;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #184194;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .grid-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .grid-2-cols {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .grid-3-cols {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .grid-4-cols {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .menu-bar {
+            background: #f3f4f6;
+            padding: 10px 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .menu-item {
+            display: inline-block;
+            padding: 8px 15px;
+            margin-right: 10px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #4a5568;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background: #184194;
+            color: white;
+        }
+
+        .dashboard-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .dashboard-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #184194;
+        }
+
+        .dashboard-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .data-table th,
+        .data-table td {
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .data-table th {
+            background: #f3f4f6;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-planning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .gantt-container {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 20px;
+            margin-top: 15px;
+            min-height: 300px;
+            position: relative;
+        }
+
+        .gantt-bar {
+            height: 20px;
+            border-radius: 2px;
+            margin: 5px 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            font-size: 12px;
+            color: white;
+        }
+
+        .gantt-po { background: #184194; }
+        .gantt-team { background: #16a34a; }
+        .gantt-real { background: #dc2626; }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 4px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .nav-tab.active {
+            background: #184194;
+            color: white;
+            border-color: #184194;
+        }
+
+        .nav-tab:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+
+        .nav-tab:last-child {
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+     <!-- Modern Navbar -->
+     <nav class="navbar">
+        <div class="navbar-container">
+            <!-- Logo -->
+            <a href="#" class="logo">
+                <div class="logo-icon">📊</div>
+                <span>CgsProject</span>
+            </a>
+
+            <!-- Navigation Menu -->
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link " onclick="setActive(this); showScreen('dashboard')">
+                        <span class="nav-icon">🏠</span>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="setActive(this); showScreen('cadastro')">
+                        <span class="nav-icon">📁</span>
+                        <span>Projetos</span>
+                        <div class="status-indicator"></div>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="setActive(this); showScreen('gantt')">
+                        <span class="nav-icon">📊</span>
+                        <span>Gantt</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="setActive(this); showScreen('roadmap')">
+                        <span class="nav-icon">🗓️</span>
+                        <span>Roadmap</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="setActive(this); showScreen('velocity')">
+                        <span class="nav-icon">📈</span>
+                        <span>Velocity</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="setActive(this); showScreen('capacidade')">
+                        <span class="nav-icon">⚡</span>
+                        <span>Capacidade</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="setActive(this); showScreen('relatorio')">
+                        <span class="nav-icon">📃</span>
+                        <span>Relatórios</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="setActive(this); showScreen('configuracao')">
+                        <span class="nav-icon">⚙️</span>
+                        <span>&nbsp;</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- User Profile -->
+            <div class="user-profile">
+                <!-- Notifications -->
+                <div class="notifications" onclick="toggleNotifications()">
+                    <span style="font-size: 18px;">🔔</span>
+                    <div class="notification-badge"></div>
+                </div>
+
+                <!-- User Info -->
+                <div class="user-info">
+                    <div class="user-name">Marcos Araujo</div>
+                    <div class="user-role">Ass. Pastelaria</div>
+                </div>
+
+                <!-- User Avatar -->
+                <div class="user-avatar" onclick="toggleUserMenu()">
+                    MA
+                </div>
+
+                <!-- Mobile Menu Toggle -->
+                <div class="mobile-toggle" onclick="toggleMobileMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="nav-global">
+        <button onclick="showScreen('login')">🔐 Login</button>
+        <button onclick="showScreen('dashboard')">🏠 Dashboard</button>
+        <button onclick="showScreen('cadastro')">📁 Cadastro</button>
+        <button onclick="showScreen('relatorio')">📃 Relatório</button>
+        <button onclick="showScreen('gantt')">📊 Gantt</button>
+        <button onclick="showScreen('roadmap')">🗓️ Roadmap</button>
+        <button onclick="showScreen('velocity')">📈 Velocity</button>
+        <button onclick="showScreen('capacidade')">⚡ Capacidade</button>
+      </div>
+       <!-- Content Area -->
+    <div class="content">
+        <!-- Breadcrumb -->
+        <!-- <div class="breadcrumb">
+            <div class="breadcrumb-item">
+                <span>🏠</span>
+                <span>Dashboard</span>
+            </div>
+            <span class="breadcrumb-separator">›</span>
+            <div class="breadcrumb-item">
+                <span>Projetos</span>
+            </div>
+        </div> -->
+    <div class="prototype-container">
+        <h1 style="text-align: center; margin-bottom: 30px; color: #184194;">
+            Sistema de Gestão de Projetos - Protótipos WinForms
+        </h1>
+
+        <!-- Tela de Login -->
+        <div class="screen" id="login">
+            <div class="screen-header">🔐 Tela de Login</div>
+            <div class="screen-content">
+                <div class="login-container">
+                    <div style="padding: 30px;">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h2 style="color: #184194; margin-bottom: 10px;">Sistema de Projetos</h2>
+                            <p style="color: #6b7280;">Faça login para continuar</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">E-mail:</label>
+                            <input type="email" class="form-control" placeholder="Digite seu e-mail">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Senha:</label>
+                            <input type="password" class="form-control" placeholder="Digite sua senha">
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button class="btn btn-primary" style="width: 100%;">Entrar</button>
+                        </div>
+                        
+                        <div style="margin-top: 15px; text-align: center;">
+                            <span style="color: #ef4444; font-size: 12px;">Credenciais inválidas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Principal -->
+        <div class="screen" id="dashboard">
+            <div class="screen-header">🏠 Dashboard Principal</div>
+            <!-- <div class="menu-bar">
+                <span class="menu-item" onclick="showScreen('cadastro')">📋 Projetos</span>
+                <span class="menu-item" onclick="showScreen('usuario')">👥 Usuários</span>
+                <span class="menu-item" onclick="showScreen('relatorio')">📊 Relatórios</span>
+                <span class="menu-item" onclick="showScreen('gantt')">⚙️ Gantt</span>
+                <span class="menu-item" onclick="showScreen('roadmap')">🗓️  RoadMap</span>
+                <span class="menu-item" onclick="showScreen('velocity')">📈 Velocity</span>
+                <span class="menu-item" onclick="showScreen('capacidade')">⚡ capacidade</span>
+                <span class="menu-item" onclick="showScreen('Config')">⚙️ Configurações</span>
+                <span style="float: right; color: #4a5568;">Bem-vindo, XXXXX XXXXXXXXX</span>
+            </div> -->
+            <div class="screen-content">
+                <div class="grid-container grid-4-cols" style="margin-bottom: 30px;">
+                    <div class="dashboard-card">
+                        <div class="dashboard-number">24</div>
+                        <div class="dashboard-label">Projetos Ativos</div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="dashboard-number">87%</div>
+                        <div class="dashboard-label">Entregas no Prazo</div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="dashboard-number">5</div>
+                        <div class="dashboard-label">Projetos Atrasados</div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="dashboard-number">12</div>
+                        <div class="dashboard-label">Concluídos este Mês</div>
+                    </div>
+                </div>
+
+                <h3 style="color: #4a5568; margin-bottom: 15px;">Projetos Recentes</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nome</th>
+                            <th>Status</th>
+                            <th>Responsável</th>
+                            <th>Prazo</th>
+                            <th>Criticidade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PRJ-001</td>
+                            <td>Módulo de Vendas</td>
+                            <td><span class="status-badge status-progress">Em Andamento</span></td>
+                            <td>Maria Santos</td>
+                            <td>15/07/2025</td>
+                            <td>Alta</td>
+                        </tr>
+                        <tr>
+                            <td>PRJ-002</td>
+                            <td>API Gateway</td>
+                            <td><span class="status-badge status-planning">Planejado</span></td>
+                            <td>Carlos Lima</td>
+                            <td>30/07/2025</td>
+                            <td>Média</td>
+                        </tr>
+                        <tr>
+                            <td>PRJ-003</td>
+                            <td>Dashboard BI</td>
+                            <td><span class="status-badge status-completed">Concluído</span></td>
+                            <td>Ana Costa</td>
+                            <td>01/07/2025</td>
+                            <td>Baixa</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Cadastro de Projeto -->
+        <div class="screen" id="cadastro">
+            <div class="screen-header">📁 Cadastro de Projeto</div>
+            <div class="screen-content">
+                <div class="grid-container grid-2-cols">
+                    <div class="form-group">
+                        <label class="form-label">Código do Projeto*:</label>
+                        <input type="text" class="form-control" placeholder="Ex: PRJ-001">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nome/Descrição*:</label>
+                        <input type="text" class="form-control" placeholder="Nome do projeto">
+                    </div>
+                </div>
+
+                <div class="grid-container grid-3-cols">
+                    <div class="form-group">
+                        <label class="form-label">Módulo/Sistema*:</label>
+                        <select class="form-control">
+                            <option>Selecione...</option>
+                            <option>Vendas</option>
+                            <option>Financeiro</option>
+                            <option>RH</option>
+                            <option>Produção</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Criticidade*:</label>
+                        <select class="form-control">
+                            <option>Selecione...</option>
+                            <option>Alta</option>
+                            <option>Média</option>
+                            <option>Baixa</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Responsável:</label>
+                        <select class="form-control">
+                            <option>Selecione...</option>
+                            <option>Maria Santos</option>
+                            <option>Carlos Lima</option>
+                            <option>Ana Costa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="nav-tabs">
+                    <div class="nav-tab active">Datas P.O.</div>
+                    <div class="nav-tab">Datas Time</div>
+                    <div class="nav-tab">Datas Reais</div>
+                </div>
+
+                <div class="grid-container grid-2-cols">
+                    <div class="form-group">
+                        <label class="form-label">Data Início (P.O.):</label>
+                        <input type="date" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Data Fim (P.O.):</label>
+                        <input type="date" class="form-control">
+                    </div>
+                </div>
+
+                <div class="grid-container grid-2-cols">
+                    <div class="form-group">
+                        <label class="form-label">Status:</label>
+                        <select class="form-control">
+                            <option>Planejado</option>
+                            <option>Em Andamento</option>
+                            <option>Concluído</option>
+                            <option>Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Estimativa (Horas):</label>
+                        <input type="number" class="form-control" placeholder="Ex: 120">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Observações:</label>
+                    <textarea class="form-control" rows="4" placeholder="Detalhes, impedimentos, comentários..."></textarea>
+                </div>
+
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn btn-secondary" style="margin-right: 10px;">Cancelar</button>
+                    <button class="btn btn-primary">Salvar Projeto</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relatório de Projetos -->
+        <div class="screen" id="relatorio">
+            <div class="screen-header">📃 Listagem e Filtros de Projetos</div>
+            <div class="screen-content">
+                <div class="toolbar">
+                    <select class="form-control" style="width: 150px;">
+                        <option>Todas Criticidades</option>
+                        <option>Alta</option>
+                        <option>Média</option>
+                        <option>Baixa</option>
+                    </select>
+                    <select class="form-control" style="width: 150px;">
+                        <option>Todos Módulos</option>
+                        <option>Vendas</option>
+                        <option>Financeiro</option>
+                        <option>RH</option>
+                    </select>
+                    <select class="form-control" style="width: 150px;">
+                        <option>Todos Status</option>
+                        <option>Planejado</option>
+                        <option>Em Andamento</option>
+                        <option>Concluído</option>
+                    </select>
+                    <input type="date" class="form-control" style="width: 150px;">
+                    <button class="btn btn-primary">Filtrar</button>
+                    <button class="btn btn-success">📊 Gerar Gantt</button>
+                    <button class="btn btn-secondary">📄 Exportar PDF</button>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nome</th>
+                            <th>Módulo</th>
+                            <th>Status</th>
+                            <th>Criticidade</th>
+                            <th>P.O. (Início)</th>
+                            <th>P.O. (Fim)</th>
+                            <th>Time (Fim)</th>
+                            <th>Real (Fim)</th>
+                            <th>Atraso</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PRJ-001</td>
+                            <td>Módulo de Vendas</td>
+                            <td>Vendas</td>
+                            <td><span class="status-badge status-progress">Em Andamento</span></td>
+                            <td>Alta</td>
+                            <td>01/06/2025</td>
+                            <td>15/07/2025</td>
+                            <td>20/07/2025</td>
+                            <td>-</td>
+                            <td>5 dias</td>
+                            <td>
+                                <button class="btn" style="background: #f59e0b; color: white; padding: 4px 8px; font-size: 12px;">✏️</button>
+                                <button class="btn" style="background: #10b981; color: white; padding: 4px 8px; font-size: 12px;">👁️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>PRJ-002</td>
+                            <td>API Gateway</td>
+                            <td>Infraestrutura</td>
+                            <td><span class="status-badge status-planning">Planejado</span></td>
+                            <td>Média</td>
+                            <td>15/07/2025</td>
+                            <td>30/07/2025</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>
+                                <button class="btn" style="background: #f59e0b; color: white; padding: 4px 8px; font-size: 12px;">✏️</button>
+                                <button class="btn" style="background: #10b981; color: white; padding: 4px 8px; font-size: 12px;">👁️</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Diagrama de Gantt -->
+        <div class="screen" id="gantt">
+            <div class="screen-header">📊 Diagrama de Gantt</div>
+            <div class="screen-content">
+                <div class="toolbar">
+                    <button class="btn btn-primary">🔄 Atualizar</button>
+                    <button class="btn btn-secondary">🖨️ Imprimir</button>
+                    <button class="btn btn-success">💾 Exportar PNG</button>
+                    <select class="form-control" style="width: 150px;">
+                        <option>Visão Mensal</option>
+                        <option>Visão Semanal</option>
+                        <option>Visão Trimestral</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <div style="display: inline-block; margin-right: 20px;">
+                        <span style="display: inline-block; width: 20px; height: 15px; background: #184194; margin-right: 5px;"></span>
+                        <span style="font-size: 14px; color: #4a5568;">Planejado P.O.</span>
+                    </div>
+                    <div style="display: inline-block; margin-right: 20px;">
+                        <span style="display: inline-block; width: 20px; height: 15px; background: #16a34a; margin-right: 5px;"></span>
+                        <span style="font-size: 14px; color: #4a5568;">Planejado Time</span>
+                    </div>
+                    <div style="display: inline-block;">
+                        <span style="display: inline-block; width: 20px; height: 15px; background: #dc2626; margin-right: 5px;"></span>
+                        <span style="font-size: 14px; color: #4a5568;">Execução Real</span>
+                    </div>
+                </div>
+
+                <div class="gantt-container">
+                    <div style="margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+                        <strong style="color: #4a5568;">PRJ-001: Módulo de Vendas</strong>
+                    </div>
+                    <div style="margin-left: 20px;">
+                        <div>P.O.:</div>
+                        <div class="gantt-bar gantt-po" style="width: 60%;">01/06 - 15/07</div>
+                        <div>Time:</div>
+                        <div class="gantt-bar gantt-team" style="width: 65%; margin-left: 10px;">01/06 - 20/07</div>
+                        <div>Real:</div>
+                        <div class="gantt-bar gantt-real" style="width: 45%; margin-left: 5px;">05/06 - ?</div>
+                    </div>
+
+                    <div style="margin: 30px 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+                        <strong style="color: #4a5568;">PRJ-002: API Gateway</strong>
+                    </div>
+                    <div style="margin-left: 20px;">
+                        <div>P.O.:</div>
+                        <div class="gantt-bar gantt-po" style="width: 40%; margin-left: 60%;">15/07 - 30/07</div>
+                        <div>Time:</div>
+                        <div style="color: #9ca3af; margin: 5px 0;">Não estimado</div>
+                        <div>Real:</div>
+                        <div style="color: #9ca3af; margin: 5px 0;">Não iniciado</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roadmap/Gantt por Período -->
+        <div class="screen" id="roadmap">
+            <div class="screen-header">🗓️ Roadmap - Visão por Período</div>
+            <div class="screen-content">
+                <div class="toolbar">
+                    <select class="form-control" style="width: 150px;">
+                        <option>2025</option>
+                        <option>2024</option>
+                        <option>2026</option>
+                    </select>
+                    <select class="form-control" style="width: 150px;">
+                        <option>Todos os Módulos</option>
+                        <option>Vendas</option>
+                        <option>Financeiro</option>
+                        <option>RH</option>
+                    </select>
+                    <button class="btn btn-primary">🔄 Atualizar</button>
+                    <button class="btn btn-secondary">🖨️ Imprimir</button>
+                    <button class="btn btn-success">💾 Exportar</button>
+                </div>
+
+                <div style="background: white; border: 1px solid #e5e7eb; border-radius: 4px; overflow-x: auto;">
+                    <!-- Cabeçalho dos meses -->
+                    <div style="display: flex; border-bottom: 2px solid #e5e7eb; background: #f9fafb;">
+                        <div style="width: 250px; padding: 10px; font-weight: bold; border-right: 1px solid #e5e7eb;">Projeto</div>
+                        <div style="width: 80px; padding: 10px; text-align: center; font-size: 12px; border-right: 1px solid #e5e7eb;">Jan 2025</div>
+                        <div style="width: 80px; padding: 10px; text-align: center; font-size: 12px; border-right: 1px solid #e5e7eb;">Fev 2025</div>
+                        <div style="width: 80px; padding: 10px; text-align: center; font-size: 12px; border-right: 1px solid #e5e7eb;">Mar 2025</div>
+                        <div style="width: 80px; padding: 10px; text-align: center; font-size: 12px; border-right: 1px solid #e5e7eb;">Abr 2025</div>
+                        <div style="width: 80px; padding: 10px; text-align: center; font-size: 12px; border-right: 1px solid #e5e7eb;">Mai 2025</div>
+                        <div style="width: 80px; padding: 10px; text-align: center; font-size: 12px; border-right: 1px solid #e5e7eb;">Jun 2025</div>
+                        <div style="width: 80px; padding: 10px; text-align: center; font-size: 12px; border-right: 1px solid #e5e7eb;">Jul 2025</div>
+                        <div style="width: 80px; padding: 10px; text-align: center; font-size: 12px; border-right: 1px solid #e5e7eb;">Ago 2025</div>
+                        <div style="width: 80px; padding: 10px; text-align: center; font-size: 12px; border-right: 1px solid #e5e7eb;">Set 2025</div>
+                        <div style="width: 80px; padding: 10px; text-align: center; font-size: 12px; border-right: 1px solid #e5e7eb;">Out 2025</div>
+                        <div style="width: 80px; padding: 10px; text-align: center; font-size: 12px; border-right: 1px solid #e5e7eb;">Nov 2025</div>
+                        <div style="width: 80px; padding: 10px; text-align: center; font-size: 12px;">Dez 2025</div>
+                    </div>
+
+                    <!-- Projeto 1 -->
+                    <div style="display: flex; border-bottom: 1px solid #e5e7eb;">
+                        <div style="width: 250px; padding: 8px; border-right: 1px solid #e5e7eb;">
+                            <div style="font-weight: bold; font-size: 14px;">Automação de Processos</div>
+                            <div style="font-size: 12px; color: #6b7280;">Planejado Time</div>
+                            <div style="font-size: 12px; color: #6b7280;">Realizado Time</div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 60px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 60px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 60px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #22c55e; height: 15px; margin: 5px 2px; border-radius: 2px;"></div>
+                            <div style="background: #16a34a; height: 15px; margin: 5px 2px; border-radius: 2px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 60px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #22c55e; height: 15px; margin: 5px 2px; border-radius: 2px;"></div>
+                            <div style="background: #16a34a; height: 15px; margin: 5px 2px; border-radius: 2px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 60px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #22c55e; height: 15px; margin: 5px 2px; border-radius: 2px;"></div>
+                            <div style="background: #16a34a; height: 15px; margin: 5px 2px; border-radius: 2px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 60px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #22c55e; height: 15px; margin: 5px 2px; border-radius: 2px;"></div>
+                            <div style="background: #16a34a; height: 15px; margin: 5px 2px; border-radius: 2px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 60px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #22c55e; height: 15px; margin: 5px 2px; border-radius: 2px;"></div>
+                            <div style="background: #16a34a; height: 15px; margin: 5px 2px; border-radius: 2px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 60px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 60px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 60px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 60px;"></div>
+                        <div style="width: 80px; position: relative; height: 60px;"></div>
+                    </div>
+
+                    <!-- Projeto 2 -->
+                    <div style="display: flex; border-bottom: 1px solid #e5e7eb;">
+                        <div style="width: 250px; padding: 8px; border-right: 1px solid #e5e7eb;">
+                            <div style="font-weight: bold; font-size: 14px;">Cadastro de Funcionários</div>
+                            <div style="font-size: 12px; color: #6b7280;">Planejado P.O.</div>
+                            <div style="font-size: 12px; color: #6b7280;">Planejado Time</div>
+                            <div style="font-size: 12px; color: #6b7280;">Realizado Time</div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #94a3b8; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #22c55e; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #16a34a; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #94a3b8; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #22c55e; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #16a34a; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #94a3b8; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #22c55e; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #16a34a; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #94a3b8; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #22c55e; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #16a34a; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #94a3b8; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #22c55e; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #16a34a; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;"></div>
+                        <div style="width: 80px; position: relative; height: 80px;"></div>
+                    </div>
+
+                    <!-- Projeto 3 -->
+                    <div style="display: flex; border-bottom: 1px solid #e5e7eb;">
+                        <div style="width: 250px; padding: 8px; border-right: 1px solid #e5e7eb;">
+                            <div style="font-weight: bold; font-size: 14px;">Cadastro de Processos</div>
+                            <div style="font-size: 12px; color: #6b7280;">Planejado P.O.</div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 40px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 40px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 40px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 40px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 40px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #f87171; height: 15px; margin: 10px 2px; border-radius: 2px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 40px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 40px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 40px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 40px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 40px;"></div>
+                        <div style="width: 80px; position: relative; height: 40px;"></div>
+                    </div>
+
+                    <!-- Projeto 4 -->
+                    <div style="display: flex;">
+                        <div style="width: 250px; padding: 8px; border-right: 1px solid #e5e7eb;">
+                            <div style="font-weight: bold; font-size: 14px;">Cadastro de Sócios</div>
+                            <div style="font-size: 12px; color: #6b7280;">Planejado P.O.</div>
+                            <div style="font-size: 12px; color: #6b7280;">Planejado Time</div>
+                            <div style="font-size: 12px; color: #6b7280;">Realizado Time</div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;"></div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #94a3b8; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #22c55e; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #16a34a; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #94a3b8; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #22c55e; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #16a34a; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #94a3b8; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #22c55e; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #16a34a; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;">
+                            <div style="font-weight: bold; font-size: 14px;">&nbsp;</div>
+                            <div style="background: #94a3b8; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #22c55e; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                            <div style="background: #16a34a; height: 12px; margin: 3px 2px; border-radius: 1px;"></div>
+                        </div>
+                        <div style="width: 80px; border-right: 1px solid #e5e7eb; position: relative; height: 80px;"></div>
+                        <div style="width: 80px; position: relative; height: 80px;"></div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 15px; display: flex; gap: 20px; font-size: 14px;">
+                    <div><span style="display: inline-block; width: 15px; height: 15px; background: #94a3b8; margin-right: 5px;"></span>Planejado P.O.</div>
+                    <div><span style="display: inline-block; width: 15px; height: 15px; background: #22c55e; margin-right: 5px;"></span>Planejado Time</div>
+                    <div><span style="display: inline-block; width: 15px; height: 15px; background: #16a34a; margin-right: 5px;"></span>Realizado</div>
+                    <div><span style="display: inline-block; width: 15px; height: 15px; background: #f87171; margin-right: 5px;"></span>Atrasado</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relatório de Velocity/Throughput -->
+        <div class="screen" id="velocity">
+            <div class="screen-header">📈 Relatório de Velocity/Throughput das Equipes</div>
+            <div class="screen-content">
+                <div class="toolbar">
+                    <select class="form-control" style="width: 150px;">
+                        <option>Últimos 6 meses</option>
+                        <option>Últimos 3 meses</option>
+                        <option>Último ano</option>
+                    </select>
+                    <select class="form-control" style="width: 150px;">
+                        <option>Todas as Equipes</option>
+                        <option>Equipe Frontend</option>
+                        <option>Equipe Backend</option>
+                        <option>Equipe Mobile</option>
+                    </select>
+                    <button class="btn btn-primary">🔄 Atualizar</button>
+                    <button class="btn btn-secondary">💾 Exportar</button>
+                </div>
+
+                <div class="grid-container grid-2-cols">
+                    <div>
+                        <h3 style="color: #4a5568; margin-bottom: 15px;">Velocity por Sprint</h3>
+                        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 20px; height: 250px; position: relative;">
+                            <div style="position: absolute; bottom: 20px; left: 20px; right: 20px; height: 150px; border-left: 2px solid #6b7280; border-bottom: 2px solid #6b7280;">
+                                <!-- Barras do gráfico -->
+                                <div style="position: absolute; bottom: 0; left: 10%; width: 15%; height: 60%; background: #184194; border-radius: 2px 2px 0 0;"></div>
+                                <div style="position: absolute; bottom: 0; left: 30%; width: 15%; height: 80%; background: #184194; border-radius: 2px 2px 0 0;"></div>
+                                <div style="position: absolute; bottom: 0; left: 50%; width: 15%; height: 45%; background: #184194; border-radius: 2px 2px 0 0;"></div>
+                                <div style="position: absolute; bottom: 0; left: 70%; width: 15%; height: 90%; background: #184194; border-radius: 2px 2px 0 0;"></div>
+                            </div>
+                            <div style="position: absolute; bottom: 5px; left: 20px; right: 20px; display: flex; justify-content: space-around; font-size: 12px; color: #6b7280;">
+                                <span>Sprint 1</span>
+                                <span>Sprint 2</span>
+                                <span>Sprint 3</span>
+                                <span>Sprint 4</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="color: #4a5568; margin-bottom: 15px;">Throughput Mensal</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Mês</th>
+                                    <th>Projetos Iniciados</th>
+                                    <th>Projetos Concluídos</th>
+                                    <th>Taxa de Conclusão</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Jun/2025</td>
+                                    <td>8</td>
+                                    <td>6</td>
+                                    <td>75%</td>
+                                </tr>
+                                <tr>
+                                    <td>Mai/2025</td>
+                                    <td>10</td>
+                                    <td>9</td>
+                                    <td>90%</td>
+                                </tr>
+                                <tr>
+                                    <td>Abr/2025</td>
+                                    <td>6</td>
+                                    <td>7</td>
+                                    <td>117%</td>
+                                </tr>
+                                <tr>
+                                    <td>Mar/2025</td>
+                                    <td>12</td>
+                                    <td>8</td>
+                                    <td>67%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <h3 style="color: #4a5568; margin-bottom: 15px;">Métricas por Equipe</h3>
+                    <div class="grid-container grid-3-cols">
+                        <div class="dashboard-card">
+                            <div class="dashboard-number">12.5</div>
+                            <div class="dashboard-label">Story Points/Sprint Médio</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-number">3.2</div>
+                            <div class="dashboard-label">Projetos/Mês Médio</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-number">85%</div>
+                            <div class="dashboard-label">Previsibilidade</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Relatório de Capacidade -->
+        <div class="screen" id="capacidade">
+            <div class="screen-header">⚡ Relatório de Capacidade por Período</div>
+            <div class="screen-content">
+                <div class="toolbar">
+                    <input type="date" class="form-control" style="width: 150px;" value="2025-01-01">
+                    <span style="margin: 0 10px;">até</span>
+                    <input type="date" class="form-control" style="width: 150px;" value="2025-12-31">
+                    <select class="form-control" style="width: 150px;">
+                        <option>Por Mês</option>
+                        <option>Por Trimestre</option>
+                        <option>Por Semestre</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="gerarCapacidade()">🔄 Gerar</button>
+                </div>
+
+                <div class="grid-container grid-2-cols" id="capacidade-grid">
+        </div>
+
+        
+    <script>
+         // Set active navigation item
+         function setActive(element) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('navMenu');
+            navMenu.classList.toggle('active');
+        }
+
+        // Simular interatividade dos protótipos
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                alert('Navegação para: ' + this.textContent);
+            });
+        });
+
+       
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const el = document.getElementById(screenId);
+      if (el) el.style.display = 'block';
+    }
+    showScreen('login');
+ 
+
+    </script>
+
+<script>
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const el = document.getElementById(screenId);
+      if (el) el.style.display = 'block';
+    }
+    showScreen('login');
+  </script>
+
+  <script>
+    // Interatividade dos tabs e menus
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+
+      document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', function () {
+          alert('Navegar para: ' + this.textContent);
+        });
+      });
+    });
+  </script>
+  <script>
+    function gerarCapacidade() {
+      const grid = document.getElementById('capacidade-grid');
+      grid.innerHTML = `
+        <h3 style="grid-column: span 2; margin-top: 30px; color: #184194;">Capacidade por Mês</h3>
+        <table class="data-table" style="grid-column: span 2;">
+          <thead>
+            <tr>
+              <th>Mês</th>
+              <th>Capacidade Total (h)</th>
+              <th>Projetos Planejados</th>
+              <th>Projetos Concluídos</th>
+              <th>Utilização (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Jan/2025</td><td>720</td><td>5</td><td>4</td><td>83%</td></tr>
+            <tr><td>Fev/2025</td><td>680</td><td>6</td><td>5</td><td>88%</td></tr>
+            <tr><td>Mar/2025</td><td>740</td><td>7</td><td>6</td><td>91%</td></tr>
+            <tr><td>Abr/2025</td><td>720</td><td>8</td><td>7</td><td>95%</td></tr>
+          </tbody>
+        </table>
+      `;
+    }
+  </script>
+</body>
+</html>
