@@ -1,0 +1,364 @@
+graph TB
+    subgraph "🎯 DOMAIN LAYER"
+        subgraph "Core Entities - MVP 1"
+            Usuario["👤 Usuario<br/>- Id: int<br/>- Nome: string<br/>- Email: string<br/>- SenhaHash: string<br/>- EquipeId: int?<br/>- TipoUsuarioId: int<br/>- StatusUsuarioId: int<br/>- BloqueadoPorRedefinicao: bool<br/>- DataCadastro: DateTime<br/>+ Validate(): NotificationResult"]
+            
+            Projeto["📁 Projeto<br/>- Id: int<br/>- Codigo: string<br/>- Nome: string<br/>- ModuloId: int<br/>- CriticidadeId: int<br/>- DataInicioPO: DateTime<br/>- DataFimPO: DateTime<br/>- EstimativaHoras: int<br/>- StatusProjetoId: int<br/>- DataCadastro: DateTime<br/>+ Validate(): NotificationResult<br/>+ ValidarPrazos(): NotificationResult"]
+            
+            Atividade["📋 Atividade<br/>- Id: int<br/>- Codigo: string<br/>- Nome: string<br/>- ProjetoId: int<br/>- ResponsavelId: int<br/>- TipoAtividadeId: int<br/>- DataInicioEstimada: DateTime<br/>- DataFimEstimada: DateTime<br/>- DataInicioPlanejada: DateTime?<br/>- DataFimPlanejada: DateTime?<br/>- DataInicioReal: DateTime?<br/>- DataFimReal: DateTime?<br/>- StatusProjetoId: int<br/>- Observacoes: string<br/>- Impedimentos: string<br/>+ Validate(): NotificationResult<br/>+ ValidarDatas(): NotificationResult"]
+        end
+        
+        subgraph "Value Objects - MVP 1"
+            CodigoProjeto["CodigoProjeto<br/>- Value: string<br/>+ Create(string): Result<CodigoProjeto><br/>+ GerarProximoCodigo(): Result<CodigoProjeto><br/>+ Validate(): NotificationResult"]
+            
+            CodigoAtividade["CodigoAtividade<br/>- Value: string<br/>+ Create(string): Result<CodigoAtividade><br/>+ GerarProximoCodigo(): Result<CodigoAtividade><br/>+ Validate(): NotificationResult"]
+            
+            PeriodoProjeto["PeriodoProjeto<br/>- DataInicio: DateTime<br/>- DataFim: DateTime<br/>+ Create(DateTime, DateTime): Result<PeriodoProjeto><br/>+ ValidarCoerencia(): NotificationResult<br/>+ CalcularDuracao(): int"]
+        end
+        
+        subgraph "Domain Services - MVP 1"
+            ProjetoService["ProjetoService<br/>+ ValidarPrazos(Projeto): NotificationResult<br/>+ CalcularAtraso(Projeto): Result<TimeSpan><br/>+ VerificarConflitos(Projeto): NotificationResult"]
+            
+            UsuarioService["UsuarioService<br/>+ ValidarPermissoes(Usuario): NotificationResult<br/>+ GerarCodigoRedefinicao(): Result<string><br/>+ ValidarSenha(string): NotificationResult"]
+        end
+        
+        subgraph "Core Patterns - MVP 1"
+            NotificationResult["NotificationResult<br/>- Errors: List<Error><br/>- Warnings: List<Warning><br/>- Successes: List<Success><br/>+ IsValid: bool<br/>+ HasWarnings: bool<br/>+ AddError(string, string, string)<br/>+ AddWarning(string, string, string)<br/>+ AddSuccess(string, string, string)<br/>+ Merge(NotificationResult)"]
+            
+            Error["Error<br/>- Field: string<br/>- Message: string<br/>- Code: string<br/>- Timestamp: DateTime"]
+            
+            Warning["Warning<br/>- Field: string<br/>- Message: string<br/>- Code: string<br/>- Timestamp: DateTime"]
+            
+            Success["Success<br/>- Field: string<br/>- Message: string<br/>- Code: string<br/>- Timestamp: DateTime"]
+        end
+        
+        subgraph "Result Pattern - MVP 1"
+            Result["Result<T><br/>- Data: T<br/>- Notifications: NotificationResult<br/>+ IsSuccess: bool<br/>+ HasWarnings: bool<br/>+ Success(T): Result<T><br/>+ Success(T, NotificationResult): Result<T><br/>+ Failure(NotificationResult): Result<T><br/>+ Failure(string, string, string): Result<T>"]
+            
+            ResultList["ResultList<T><br/>- Items: List<T><br/>- TotalCount: int<br/>- PageSize: int<br/>- CurrentPage: int<br/>- Notifications: NotificationResult<br/>+ IsSuccess: bool<br/>+ TotalPages: int<br/>+ HasNextPage: bool<br/>+ HasPreviousPage: bool<br/>+ Success(List<T>, int): ResultList<T><br/>+ Success(List<T>, int, NotificationResult): ResultList<T><br/>+ Failure(NotificationResult): ResultList<T>"]
+        end
+        
+        subgraph "Repository Interfaces - MVP 1"
+            IUsuarioRepository["IUsuarioRepository<br/>+ GetByIdAsync(int): Task<Result<Usuario>><br/>+ GetByEmailAsync(string): Task<Result<Usuario>><br/>+ CreateAsync(Usuario): Task<Result<Usuario>><br/>+ UpdateAsync(Usuario): Task<Result<Usuario>><br/>+ DeleteAsync(int): Task<Result<bool>><br/>+ GetAllAsync(): Task<ResultList<Usuario>>"]
+            
+            IProjetoRepository["IProjetoRepository<br/>+ GetByIdAsync(int): Task<Result<Projeto>><br/>+ GetByCodigoAsync(string): Task<Result<Projeto>><br/>+ GetByFiltrosAsync(filtros): Task<ResultList<Projeto>><br/>+ CreateAsync(Projeto): Task<Result<Projeto>><br/>+ UpdateAsync(Projeto): Task<Result<Projeto>>"]
+            
+            IAtividadeRepository["IAtividadeRepository<br/>+ GetByIdAsync(int): Task<Result<Atividade>><br/>+ GetByProjetoIdAsync(int): Task<ResultList<Atividade>><br/>+ GetByResponsavelAsync(int): Task<ResultList<Atividade>><br/>+ CreateAsync(Atividade): Task<Result<Atividade>><br/>+ UpdateAsync(Atividade): Task<Result<Atividade>>"]
+        end
+        
+        subgraph "Constants & Error Codes - MVP 1"
+            ErrorCodes["ErrorCodes<br/>+ REQUIRED: string<br/>+ INVALID_FORMAT: string<br/>+ MIN_LENGTH: string<br/>+ MAX_LENGTH: string<br/>+ NOT_FOUND: string<br/>+ ALREADY_EXISTS: string<br/>+ UNAUTHORIZED: string<br/>+ FORBIDDEN: string<br/>+ PROJETO_CODIGO_DUPLICADO: string<br/>+ PROJETO_DATAS_INVALIDAS: string<br/>+ ATIVIDADE_FORA_PERIODO_PROJETO: string<br/>+ USUARIO_INATIVO: string"]
+            
+            ErrorMessages["ErrorMessages<br/>- Messages: Dictionary<string, string><br/>+ GetMessage(string): string"]
+        end
+        
+        subgraph "🔍 Observability Entities - MVP 2"
+            AuditEntry["📋 AuditEntry<br/>- Id: int<br/>- UserId: string<br/>- UserName: string<br/>- Action: string<br/>- EntityType: string<br/>- EntityId: string<br/>- OldValues: string<br/>- NewValues: string<br/>- Changes: string<br/>- Timestamp: DateTime<br/>- IPAddress: string<br/>- UserAgent: string<br/>- Success: bool<br/>- ErrorMessage: string<br/>- Duration: TimeSpan"]
+            
+            LogEntry["📝 LogEntry<br/>- Id: int<br/>- Level: string<br/>- Message: string<br/>- Exception: string<br/>- Properties: string<br/>- Timestamp: DateTime<br/>- UserId: string<br/>- RequestId: string<br/>- Context: string"]
+            
+            MetricEntry["📊 MetricEntry<br/>- Id: int<br/>- Name: string<br/>- Value: double<br/>- Tags: string<br/>- Timestamp: DateTime<br/>- Type: MetricType<br/>- UserId: string"]
+        end
+        
+        subgraph "🔍 Observability Value Objects - MVP 2"
+            SerializationOptions["SerializationOptions<br/>- IncludeNullValues: bool<br/>- IncludePrivateFields: bool<br/>- UseIndentation: bool<br/>- NamingPolicy: JsonNamingPolicy<br/>- IgnoreProperties: List<string><br/>- EncryptSensitiveData: bool"]
+            
+            AlertRule["AlertRule<br/>- Name: string<br/>- Value: double<br/>- Threshold: double<br/>- Severity: AlertSeverity<br/>- Timestamp: DateTime"]
+            
+            ClientMetric["ClientMetric<br/>- Name: string<br/>- Value: string<br/>- Tags: Dictionary<string, string><br/>- Timestamp: DateTime"]
+        end
+        
+        subgraph "🔍 Enhanced Result Patterns - MVP 2"
+            LoggableResult["LoggableResult<T><br/>- Data: T<br/>- Notifications: NotificationResult<br/>- Logger: IAppLogger<br/>- Context: string<br/>+ Success(T, IAppLogger, string): LoggableResult<T><br/>+ Success(T, NotificationResult, IAppLogger, string): LoggableResult<T><br/>+ Failure(NotificationResult, IAppLogger, string): LoggableResult<T><br/>- LogResult(): void"]
+            
+            LoggableNotificationResult["LoggableNotificationResult<br/>- Errors: List<Error><br/>- Warnings: List<Warning><br/>- Successes: List<Success><br/>- Logger: IAppLogger<br/>- Context: string<br/>+ AddError(string, string, string): void<br/>+ AddWarning(string, string, string): void<br/>+ AddSuccess(string, string, string): void"]
+        end
+    end
+    
+    subgraph "🔧 APPLICATION LAYER"
+        subgraph "Core Use Cases - MVP 1"
+            UsuarioUseCases["👤 Usuario Use Cases<br/>• CriarUsuarioUseCase: Task<Result<UsuarioResponseDTO>><br/>• EditarUsuarioUseCase: Task<Result<UsuarioResponseDTO>><br/>• RedefinirSenhaUseCase: Task<Result<bool>><br/>• LoginUseCase: Task<Result<LoginResponseDTO>><br/>• ListarUsuariosUseCase: Task<ResultList<UsuarioListDTO>>"]
+            
+            ProjetoUseCases["📁 Projeto Use Cases<br/>• CriarProjetoUseCase: Task<Result<ProjetoResponseDTO>><br/>• EditarProjetoUseCase: Task<Result<ProjetoResponseDTO>><br/>• ListarProjetosUseCase: Task<ResultList<ProjetoListDTO>><br/>• AdicionarComentarioUseCase: Task<Result<bool>><br/>• ObterDetalhesProjetoUseCase: Task<Result<ProjetoDetalhesDTO>>"]
+            
+            AtividadeUseCases["📋 Atividade Use Cases<br/>• CriarAtividadeUseCase: Task<Result<AtividadeResponseDTO>><br/>• EditarAtividadeUseCase: Task<Result<AtividadeResponseDTO>><br/>• ListarAtividadesUseCase: Task<ResultList<AtividadeListDTO>><br/>• AdicionarComentarioUseCase: Task<Result<bool>><br/>• AtualizarStatusUseCase: Task<Result<AtividadeResponseDTO>>"]
+            
+            RelatorioUseCases["📊 Relatório Use Cases<br/>• GerarGanttUseCase: Task<Result<GanttDataDTO>><br/>• RelatorioAtrasosUseCase: Task<Result<RelatorioAtrasosDTO>><br/>• DashboardUseCase: Task<Result<DashboardDTO>><br/>• ExportarRelatorioUseCase: Task<Result<FileDTO>>"]
+        end
+        
+        subgraph "Core DTOs - MVP 1"
+            UsuarioDTO["UsuarioDTO<br/>• CreateUsuarioDTO<br/>• UpdateUsuarioDTO<br/>• UsuarioResponseDTO<br/>• UsuarioListDTO<br/>• LoginDTO<br/>• LoginResponseDTO<br/>• RedefinirSenhaDTO"]
+            
+            ProjetoDTO["ProjetoDTO<br/>• CreateProjetoDTO<br/>• UpdateProjetoDTO<br/>• ProjetoResponseDTO<br/>• ProjetoListDTO<br/>• ProjetoDetalhesDTO<br/>• ProjetoFiltroDTO"]
+            
+            AtividadeDTO["AtividadeDTO<br/>• CreateAtividadeDTO<br/>• UpdateAtividadeDTO<br/>• AtividadeResponseDTO<br/>• AtividadeListDTO<br/>• AtividadeFiltroDTO"]
+            
+            ApiResponse["ApiResponse<T><br/>- Data: T<br/>- Errors: List<ErrorDTO><br/>- Warnings: List<WarningDTO><br/>- Successes: List<SuccessDTO><br/>- IsSuccess: bool<br/>- Message: string<br/>- Timestamp: DateTime<br/>+ FromResult(Result<T>): ApiResponse<T>"]
+        end
+        
+        subgraph "Core Services - MVP 1"
+            AuthService["AuthService<br/>+ ValidarLogin(LoginDTO): Task<Result<LoginResponseDTO>><br/>+ GerarToken(Usuario): Result<string><br/>+ ValidarToken(string): Result<Usuario>"]
+            
+            EmailService["EmailService<br/>+ EnviarCodigoRedefinicao(Usuario, string): Task<Result<bool>><br/>+ EnviarNotificacao(Usuario, string): Task<Result<bool>>"]
+            
+            RelatorioService["RelatorioService<br/>+ GerarGantt(List<Projeto>): Result<GanttDataDTO><br/>+ CalcularIndicadores(List<Projeto>): Result<DashboardDTO><br/>+ ExportarPDF(dados): Task<Result<FileDTO>>"]
+            
+            ValidationService["ValidationService<br/>+ ValidateDTO<T>(T): NotificationResult<br/>+ ValidateBusinessRules<T>(T): NotificationResult"]
+        end
+        
+        subgraph "🔍 Observability Interfaces - MVP 2"
+            IAppLogger["IAppLogger<br/>+ LogInformation(string, params object[]): void<br/>+ LogWarning(string, params object[]): void<br/>+ LogError(string, Exception, params object[]): void<br/>+ LogError(NotificationResult, string): void<br/>+ LogDebug(string, params object[]): void<br/>+ LogTrace(string, params object[]): void<br/>+ LogUserAction(string, string, string, object): void<br/>+ LogBusinessRule(string, bool, string): void<br/>+ LogPerformance(string, TimeSpan, bool): void"]
+            
+            ISerializationService["ISerializationService<br/>+ SerializeAsync<T>(T, SerializationOptions): Task<string><br/>+ DeserializeAsync<T>(string, SerializationOptions): Task<T><br/>+ SerializeToBytesAsync<T>(T, SerializationOptions): Task<byte[]><br/>+ DeserializeFromBytesAsync<T>(byte[], SerializationOptions): Task<T>"]
+            
+            IMetricsService["IMetricsService<br/>+ IncrementCounter(string, Dictionary<string, string>): void<br/>+ RecordValue(string, double, Dictionary<string, string>): void<br/>+ RecordDuration(string, TimeSpan, Dictionary<string, string>): void<br/>+ SetGauge(string, double, Dictionary<string, string>): void<br/>+ StartTimer(string, Dictionary<string, string>): IDisposable<br/>+ RecordUserLogin(string, bool): void<br/>+ RecordProjectCreation(string, TimeSpan): void<br/>+ RecordApiCall(string, int, TimeSpan): void<br/>+ RecordBusinessRuleValidation(string, bool): void<br/>+ RecordDatabaseOperation(string, bool, TimeSpan): void"]
+            
+            IAuditService["IAuditService<br/>+ LogActionAsync<T>(string, string, T, T): Task<Result<AuditEntry>><br/>+ GetAuditTrailAsync(string, string): Task<Result<List<AuditEntry>>><br/>+ GetUserActionsAsync(string, DateTime?, DateTime?): Task<Result<List<AuditEntry>>>"]
+        end
+        
+        subgraph "🔍 Observability DTOs - MVP 2"
+            ErrorDTO["ErrorDTO<br/>- Field: string<br/>- Message: string<br/>- Code: string"]
+            
+            WarningDTO["WarningDTO<br/>- Field: string<br/>- Message: string<br/>- Code: string"]
+            
+            SuccessDTO["SuccessDTO<br/>- Field: string<br/>- Message: string<br/>- Code: string"]
+            
+            DashboardDataDTO["DashboardDataDTO<br/>- System: SystemMetrics<br/>- Application: ApplicationMetrics<br/>- Business: BusinessMetrics<br/>- Performance: PerformanceMetrics"]
+            
+            HealthCheckResultDTO["HealthCheckResultDTO<br/>- Status: HealthStatus<br/>- Timestamp: DateTime<br/>- Duration: TimeSpan<br/>- Components: List<ComponentHealth>"]
+        end
+        
+        subgraph "🔍 Extension Methods - MVP 2"
+            UseCaseExtensions["UseCaseExtensions<br/>+ ExecuteWithInstrumentationAsync<T>(Func<Task<Result<T>>>, string, IMetricsService, IAppLogger, string): Task<Result<T>>"]
+        end
+    end
+    
+    subgraph "🏗️ INFRASTRUCTURE LAYER"
+        subgraph "Core Data - MVP 1"
+            AppDbContext["AppDbContext<br/>+ DbSet<Usuario><br/>+ DbSet<Projeto><br/>+ DbSet<Atividade><br/>+ DbSet<Equipe><br/>+ DbSet<StatusUsuario><br/>+ DbSet<ModuloSistema><br/>+ DbSet<Criticidade><br/>+ DbSet<TipoAtividade><br/>+ OnModelCreating(): void<br/>+ SaveChangesAsync(): Task<Result<int>>"]
+            
+            UsuarioRepository["UsuarioRepository<br/>+ GetByIdAsync(int): Task<Result<Usuario>><br/>+ GetByEmailAsync(string): Task<Result<Usuario>><br/>+ CreateAsync(Usuario): Task<Result<Usuario>><br/>+ UpdateAsync(Usuario): Task<Result<Usuario>><br/>+ DeleteAsync(int): Task<Result<bool>><br/>+ GetAllAsync(): Task<ResultList<Usuario>>"]
+            
+            ProjetoRepository["ProjetoRepository<br/>+ GetByIdAsync(int): Task<Result<Projeto>><br/>+ GetByCodigoAsync(string): Task<Result<Projeto>><br/>+ GetByFiltrosAsync(filtros): Task<ResultList<Projeto>><br/>+ CreateAsync(Projeto): Task<Result<Projeto>><br/>+ UpdateAsync(Projeto): Task<Result<Projeto>>"]
+            
+            AtividadeRepository["AtividadeRepository<br/>+ GetByIdAsync(int): Task<Result<Atividade>><br/>+ GetByProjetoIdAsync(int): Task<ResultList<Atividade>><br/>+ GetByResponsavelAsync(int): Task<ResultList<Atividade>><br/>+ CreateAsync(Atividade): Task<Result<Atividade>><br/>+ UpdateAsync(Atividade): Task<Result<Atividade>>"]
+        end
+        
+        subgraph "Core External Services - MVP 1"
+            EmailProvider["EmailProvider<br/>+ SendEmailAsync(string, string, string): Task<Result<bool>><br/>+ SendBulkEmailAsync(List<Email>): Task<Result<int>>"]
+            
+            FileService["FileService<br/>+ ExportToPDF(dados): Task<Result<FileDTO>><br/>+ ExportToExcel(dados): Task<Result<FileDTO>><br/>+ SaveFile(FileDTO): Task<Result<string>>"]
+            
+            JwtService["JwtService<br/>+ GenerateToken(Usuario): Result<string><br/>+ ValidateToken(string): Result<ClaimsPrincipal><br/>+ RefreshToken(string): Result<string>"]
+            
+            EncryptionService["EncryptionService<br/>+ EncryptAsync(string): Task<string><br/>+ DecryptAsync(string): Task<string><br/>+ HashPassword(string): string<br/>+ VerifyPassword(string, string): bool"]
+        end
+        
+        subgraph "🔍 Observability Infrastructure - MVP 2"
+            AppLogger["AppLogger<br/>- Logger: ILogger<AppLogger><br/>- ServiceProvider: IServiceProvider<br/>+ LogInformation(string, params object[]): void<br/>+ LogWarning(string, params object[]): void<br/>+ LogError(string, Exception, params object[]): void<br/>+ LogError(NotificationResult, string): void<br/>+ LogUserAction(string, string, string, object): void<br/>+ LogBusinessRule(string, bool, string): void<br/>+ LogPerformance(string, TimeSpan, bool): void"]
+            
+            SerializationService["SerializationService<br/>- Logger: ILogger<SerializationService><br/>- EncryptionService: IEncryptionService<br/>+ SerializeAsync<T>(T, SerializationOptions): Task<string><br/>+ DeserializeAsync<T>(string, SerializationOptions): Task<T><br/>+ SerializeToBytesAsync<T>(T, SerializationOptions): Task<byte[]><br/>+ DeserializeFromBytesAsync<T>(byte[], SerializationOptions): Task<T>"]
+            
+            MetricsService["MetricsService<br/>- Logger: ILogger<MetricsService><br/>- Collector: IMetricsCollector<br/>+ IncrementCounter(string, Dictionary<string, string>): void<br/>+ RecordValue(string, double, Dictionary<string, string>): void<br/>+ RecordDuration(string, TimeSpan, Dictionary<string, string>): void<br/>+ SetGauge(string, double, Dictionary<string, string>): void<br/>+ StartTimer(string, Dictionary<string, string>): IDisposable<br/>+ RecordUserLogin(string, bool): void<br/>+ RecordProjectCreation(string, TimeSpan): void<br/>+ RecordApiCall(string, int, TimeSpan): void"]
+            
+            PrometheusMetricsCollector["PrometheusMetricsCollector<br/>- Counters: ConcurrentDictionary<string, ICounter><br/>- Histograms: ConcurrentDictionary<string, IHistogram><br/>- Gauges: ConcurrentDictionary<string, IGauge><br/>+ IncrementCounter(string, Dictionary<string, string>): void<br/>+ RecordValue(string, double, Dictionary<string, string>): void<br/>+ RecordDuration(string, TimeSpan, Dictionary<string, string>): void<br/>+ SetGauge(string, double, Dictionary<string, string>): void"]
+            
+            AuditService["AuditService<br/>- AuditRepository: IRepository<AuditEntry><br/>- SerializationService: ISerializationService<br/>- Logger: IAppLogger<br/>- HttpContextAccessor: IHttpContextAccessor<br/>+ LogActionAsync<T>(string, string, T, T): Task<Result<AuditEntry>><br/>+ GetAuditTrailAsync(string, string): Task<Result<List<AuditEntry>>><br/>+ GetUserActionsAsync(string, DateTime?, DateTime?): Task<Result<List<AuditEntry>>>"]
+        end
+        
+        subgraph "🔍 Health & Monitoring - MVP 2"
+            HealthCheckService["HealthCheckService<br/>- ServiceProvider: IServiceProvider<br/>- Logger: IAppLogger<br/>+ CheckSystemHealthAsync(): Task<Result<HealthCheckResult>><br/>+ CheckComponentsHealthAsync(): Task<Result<List<ComponentHealth>>><br/>- CheckDatabaseHealthAsync(): Task<ComponentHealth><br/>- CheckEmailServiceHealthAsync(): Task<ComponentHealth><br/>- CheckFileSystemHealthAsync(): Task<ComponentHealth><br/>- CheckMemoryHealth(): ComponentHealth"]
+            
+            DashboardService["DashboardService<br/>- MetricsService: IMetricsService<br/>- SystemMonitor: ISystemMonitor<br/>- Logger: IAppLogger<br/>+ GetDashboardDataAsync(): Task<Result<DashboardData>><br/>+ GetActiveAlertsAsync(): Task<Result<List<AlertRule>>><br/>- GetSystemMetricsAsync(): Task<SystemMetrics><br/>- GetApplicationMetricsAsync(): Task<ApplicationMetrics><br/>- GetBusinessMetricsAsync(): Task<BusinessMetrics><br/>- GetPerformanceMetricsAsync(): Task<PerformanceMetrics>"]
+            
+            SystemMonitor["SystemMonitor<br/>+ GetCpuUsageAsync(): Task<double><br/>+ GetMemoryUsageAsync(): Task<double><br/>+ GetDiskUsageAsync(): Task<double><br/>+ GetActiveConnectionsAsync(): Task<int>"]
+        end
+        
+        subgraph "🔍 Configuration - MVP 2"
+            ServiceRegistration["ServiceRegistration<br/>+ AddInfrastructureServices(IServiceCollection, IConfiguration): IServiceCollection<br/>+ AddObservabilityServices(IServiceCollection, IConfiguration): IServiceCollection<br/>+ ConfigureLogging(IServiceCollection, IConfiguration): void"]
+        end
+    end
+    
+    subgraph "🌐 API LAYER"
+        subgraph "Core Controllers - MVP 1"
+            AuthController["AuthController<br/>+ Login(LoginDTO): Task<ApiResponse<LoginResponseDTO>><br/>+ RedefinirSenha(RedefinirSenhaDTO): Task<ApiResponse<bool>><br/>+ ValidarToken(): Task<ApiResponse<Usuario>>"]
+            
+            UsuarioController["UsuarioController<br/>+ Get(int): Task<ApiResponse<UsuarioResponseDTO>><br/>+ Post(CreateUsuarioDTO): Task<ApiResponse<UsuarioResponseDTO>><br/>+ Put(int, UpdateUsuarioDTO): Task<ApiResponse<UsuarioResponseDTO>><br/>+ Delete(int): Task<ApiResponse<bool>><br/>+ GetAll(): Task<ApiResponse<List<UsuarioListDTO>>>"]
+            
+            ProjetoController["ProjetoController<br/>+ Get(int): Task<ApiResponse<ProjetoResponseDTO>><br/>+ Post(CreateProjetoDTO): Task<ApiResponse<ProjetoResponseDTO>><br/>+ Put(int, UpdateProjetoDTO): Task<ApiResponse<ProjetoResponseDTO>><br/>+ GetByFiltros(ProjetoFiltroDTO): Task<ApiResponse<List<ProjetoListDTO>>><br/>+ AdicionarComentario(int, string): Task<ApiResponse<bool>>"]
+            
+            AtividadeController["AtividadeController<br/>+ Get(int): Task<ApiResponse<AtividadeResponseDTO>><br/>+ Post(CreateAtividadeDTO): Task<ApiResponse<AtividadeResponseDTO>><br/>+ Put(int, UpdateAtividadeDTO): Task<ApiResponse<AtividadeResponseDTO>><br/>+ GetByProjeto(int): Task<ApiResponse<List<AtividadeListDTO>>><br/>+ AdicionarComentario(int, string): Task<ApiResponse<bool>>"]
+            
+            RelatorioController["RelatorioController<br/>+ GerarGantt(filtros): Task<ApiResponse<GanttDataDTO>><br/>+ Dashboard(): Task<ApiResponse<DashboardDTO>><br/>+ ExportarPDF(filtros): Task<ApiResponse<FileDTO>>"]
+        end
+        
+        subgraph "Core Middleware - MVP 1"
+            AuthMiddleware["AuthMiddleware<br/>+ InvokeAsync(HttpContext): Task<br/>+ ValidateJWT(): Result<ClaimsPrincipal>"]
+            
+            ExceptionMiddleware["ExceptionMiddleware<br/>+ InvokeAsync(HttpContext): Task<br/>+ HandleException(Exception): ApiResponse<object>"]
+        end
+        
+        subgraph "Core Filters - MVP 1"
+            AuthorizeFilter["AuthorizeFilter<br/>+ OnAuthorization(AuthorizationFilterContext): void<br/>+ ValidatePermissions(): NotificationResult"]
+            
+            ValidationFilter["ValidationFilter<br/>+ OnActionExecuting(ActionExecutingContext): void<br/>+ ValidateModel(): NotificationResult"]
+        end
+        
+        subgraph "🔍 Observability Controllers - MVP 2"
+            MetricsController["MetricsController<br/>+ PostClientMetrics(List<ClientMetric>): Task<ApiResponse<bool>><br/>+ GetSystemMetrics(): Task<ApiResponse<SystemMetrics>><br/>+ GetDashboard(): Task<ApiResponse<DashboardData>>"]
+            
+            HealthController["HealthController<br/>+ GetHealth(): Task<ApiResponse<HealthCheckResult>><br/>+ GetDetailedHealth(): Task<ApiResponse<List<ComponentHealth>>>"]
+            
+            AuditController["AuditController<br/>+ GetAuditTrail(string, string): Task<ApiResponse<List<AuditEntry>>><br/>+ GetUserActions(string, DateTime?, DateTime?): Task<ApiResponse<List<AuditEntry>>>"]
+        end
+        
+        subgraph "🔍 Observability Middleware - MVP 2"
+            InstrumentationMiddleware["InstrumentationMiddleware<br/>- Next: RequestDelegate<br/>- MetricsService: IMetricsService<br/>- Logger: IAppLogger<br/>- AuditService: IAuditService<br/>+ InvokeAsync(HttpContext): Task<br/>- IsCriticalOperation(HttpContext): bool<br/>- LogAuditEntryAsync(HttpContext, TimeSpan): Task"]
+            
+            NotificationMiddleware["NotificationMiddleware<br/>+ InvokeAsync(HttpContext): Task<br/>+ ProcessNotifications(): ApiResponse<object>"]
+        end
+        
+        subgraph "🔍 API Extensions - MVP 2"
+            ApplicationBuilderExtensions["ApplicationBuilderExtensions<br/>+ UseObservabilityMiddleware(IApplicationBuilder): IApplicationBuilder<br/>- WriteHealthCheckResponse(HttpContext, HealthReport): Task"]
+            
+            ServiceCollectionExtensions["ServiceCollectionExtensions<br/>+ AddApiServices(IServiceCollection): IServiceCollection"]
+        end
+    end
+    
+    subgraph "🖥️ WINFORMS LAYER"
+        subgraph "Core Forms - MVP 1"
+            LoginForm["LoginForm<br/>+ txtEmail: TextBox<br/>+ txtSenha: TextBox<br/>+ btnEntrar: Button<br/>+ lblErrors: Label<br/>+ ValidarLogin(): Task<br/>+ ExibirErros(List<ErrorDTO>): void<br/>+ ExibirAlertas(List<WarningDTO>): void"]
+            
+            MainForm["MainForm<br/>+ menuStrip: MenuStrip<br/>+ statusStrip: StatusStrip<br/>+ lblNotificacoes: Label<br/>+ AbrirTela(): void<br/>+ ExibirNotificacoes(NotificationResult): void"]
+            
+            ProjetoForm["ProjetoForm<br/>+ txtCodigo: TextBox<br/>+ txtNome: TextBox<br/>+ cmbModulo: ComboBox<br/>+ dtpInicio: DateTimePicker<br/>+ dtpFim: DateTimePicker<br/>+ pnlErrors: Panel<br/>+ SalvarProjeto(): Task<br/>+ ExibirErros(List<ErrorDTO>): void<br/>+ ExibirAlertas(List<WarningDTO>): void<br/>+ ValidarCampos(): NotificationResult"]
+            
+            AtividadeForm["AtividadeForm<br/>+ txtCodigo: TextBox<br/>+ txtNome: TextBox<br/>+ cmbProjeto: ComboBox<br/>+ cmbResponsavel: ComboBox<br/>+ pnlErrors: Panel<br/>+ SalvarAtividade(): Task<br/>+ ExibirErros(List<ErrorDTO>): void<br/>+ ExibirAlertas(List<WarningDTO>): void<br/>+ ValidarCampos(): NotificationResult"]
+            
+            RelatorioForm["RelatorioForm<br/>+ dgvProjetos: DataGridView<br/>+ filtros: Panel<br/>+ btnGerarGantt: Button<br/>+ btnExportar: Button<br/>+ pnlErrors: Panel<br/>+ ExibirErros(List<ErrorDTO>): void<br/>+ ExibirAlertas(List<WarningDTO>): void"]
+            
+            UsuarioForm["UsuarioForm<br/>+ txtNome: TextBox<br/>+ txtEmail: TextBox<br/>+ cmbTipo: ComboBox<br/>+ cmbStatus: ComboBox<br/>+ pnlErrors: Panel<br/>+ SalvarUsuario(): Task<br/>+ ExibirErros(List<ErrorDTO>): void<br/>+ ExibirAlertas(List<WarningDTO>): void"]
+        end
+        
+        subgraph "Core Services - MVP 1"
+            ApiService["ApiService<br/>+ GetAsync<T>(string): Task<ApiResponse<T>><br/>+ PostAsync<T>(string, object): Task<ApiResponse<T>><br/>+ PutAsync<T>(string, object): Task<ApiResponse<T>><br/>+ DeleteAsync(string): Task<ApiResponse<bool>><br/>+ ProcessResponse<T>(ApiResponse<T>): Result<T>"]
+        end
+        
+        subgraph "🔍 Observability Forms - MVP 2"
+            DashboardForm["DashboardForm<br/>+ chartMetrics: Chart<br/>+ lblSystemStatus: Label<br/>+ dgvAlerts: DataGridView<br/>+ lblPerformance: Label<br/>+ UpdateMetrics(): Task<br/>+ RefreshDashboard(): Task<br/>+ ShowAlert(AlertRule): void"]
+            
+            LogViewerForm["LogViewerForm<br/>+ dgvLogs: DataGridView<br/>+ txtSearch: TextBox<br/>+ cmbLevel: ComboBox<br/>+ dtpFrom: DateTimePicker<br/>+ dtpTo: DateTimePicker<br/>+ btnSearch: Button<br/>+ LoadLogs(): Task<br/>+ FilterLogs(): void<br/>+ ExportLogs(): Task"]
+            
+            AuditTrailForm["AuditTrailForm<br/>+ dgvAudit: DataGridView<br/>+ txtUserId: TextBox<br/>+ txtEntityType: TextBox<br/>+ dtpFrom: DateTimePicker<br/>+ dtpTo: DateTimePicker<br/>+ btnSearch: Button<br/>+ LoadAuditTrail(): Task<br/>+ ShowDetails(AuditEntry): void<br/>+ ExportAudit(): Task"]
+        end
+        
+        subgraph "🔍 Observability Services - MVP 2"
+            FormService["FormService<br/>- NotificationService: NotificationService<br/>+ ExibirNotificacoes(Form, NotificationResult): void<br/>+ ExibirErros(Form, List<e>): void<br/>+ ExibirAvisos(Form, List<Warning>): void<br/>+ ExibirSucessos(Form, List<Success>): void<br/>+ GetOrCreateErrorPanel(Form): Panel<br/>+ GetOrCreateWarningPanel(Form): Panel<br/>+ GetOrCreateSuccessPanel(Form): Panel<br/>+ LimparNotificacoes(Form): void"]
+            
+            NotificationService["NotificationService<br/>+ ExibirErro(string, string): void<br/>+ ExibirAlerta(string, string): void<br/>+ ExibirSucesso(string, string): void<br/>+ ExibirNotificacoes(NotificationResult): void"]
+            
+            WinFormsMetricsService["WinFormsMetricsService<br/>- ApiService: ApiService<br/>- MetricsTimer: Timer<br/>- LocalMetrics: List<ClientMetric><br/>- Lock: object<br/>+ RecordFormOpen(string): void<br/>+ RecordFormClose(string, TimeSpan): void<br/>+ RecordUserAction(string, string): void<br/>- SendMetricsAsync(object, ElapsedEventArgs): void<br/>+ Dispose(): void"]
+            
+            WinFormsLogger["WinFormsLogger<br/>- LogFile: string<br/>- MaxFileSize: long<br/>+ LogInfo(string): void<br/>+ LogWarning(string): void<br/>+ LogError(string, Exception): void<br/>+ LogUserAction(string, string): void<br/>- WriteToFile(string, LogLevel): void<br/>- RotateLogFile(): void"]
+        end
+        
+        subgraph "🔍 WinForms Extensions - MVP 2"
+            FormExtensions["FormExtensions<br/>+ WithInstrumentation(Form, WinFormsMetricsService): Form<br/>+ WithNotificationHandling(Form, FormService): Form<br/>+ WithValidation(Form): Form"]
+            
+            ControlExtensions["ControlExtensions<br/>+ AddValidationRule(Control, Func<bool>, string): void<br/>+ ValidateAll(Form): NotificationResult<br/>+ HighlightError(Control): void<br/>+ ClearHighlight(Control): void"]
+        end
+    end
+    
+    %% Relacionamentos MVP 1
+    Usuario --> NotificationResult
+    Projeto --> NotificationResult
+    Atividade --> NotificationResult
+    
+    CodigoProjeto --> Result
+    CodigoAtividade --> Result
+    PeriodoProjeto --> Result
+    
+    UsuarioUseCases --> Result
+    ProjetoUseCases --> Result
+    AtividadeUseCases --> Result
+    RelatorioUseCases --> Result
+    
+    IUsuarioRepository --> Result
+    IProjetoRepository --> Result
+    IAtividadeRepository --> Result
+    
+    AuthController --> ApiResponse
+    UsuarioController --> ApiResponse
+    ProjetoController --> ApiResponse
+    AtividadeController --> ApiResponse
+    RelatorioController --> ApiResponse
+    
+    LoginForm --> ApiService
+    ProjetoForm --> ApiService
+    AtividadeForm --> ApiService
+    RelatorioForm --> ApiService
+    UsuarioForm --> ApiService
+    
+    %% Relacionamentos MVP 2 - Observabilidade
+    LoggableResult --> IAppLogger
+    LoggableNotificationResult --> IAppLogger
+    
+    AppLogger --> IAppLogger
+    SerializationService --> ISerializationService
+    MetricsService --> IMetricsService
+    AuditService --> IAuditService
+    
+    InstrumentationMiddleware --> IMetricsService
+    InstrumentationMiddleware --> IAppLogger
+    InstrumentationMiddleware --> IAuditService
+    
+    MetricsController --> IMetricsService
+    HealthController --> HealthCheckService
+    AuditController --> IAuditService
+    
+    FormService --> NotificationService
+    WinFormsMetricsService --> ApiService
+    DashboardForm --> ApiService
+    LogViewerForm --> ApiService
+    AuditTrailForm --> ApiService
+    
+    %% Relacionamentos entre MVPs
+    ProjetoUseCases -.-> IAppLogger
+    ProjetoUseCases -.-> IMetricsService
+    ProjetoUseCases -.-> IAuditService
+    
+    ProjetoRepository -.-> IAppLogger
+    ProjetoRepository -.-> IMetricsService
+    
+    ProjetoForm -.-> FormService
+    ProjetoForm -.-> WinFormsMetricsService
+    
+    %% Estilos
+    classDef mvp1Core fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef mvp1Application fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
+    classDef mvp1Infrastructure fill:#e8f5e8,stroke:#1b5e20,stroke-width:3px
+    classDef mvp1Api fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    classDef mvp1WinForms fill:#fce4ec,stroke:#880e4f,stroke-width:3px
+    
+    classDef mvp2Observability fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+    classDef mvp2Enhanced fill:#f1f8e9,stroke:#33691e,stroke-width:3px
+    classDef mvp2Monitoring fill:#fff3e0,stroke:#bf360c,stroke-width:3px
+    
+    classDef patternClass fill:#fff9c4,stroke:#f57f17,stroke-width:4px
+    
+    %% MVP 1 - Core Classes
+    class Usuario,Projeto,Atividade,CodigoProjeto,CodigoAtividade,PeriodoProjeto,ProjetoService,UsuarioService,IUsuarioRepository,IProjetoRepository,IAtividadeRepository,ErrorCodes,ErrorMessages mvp1Core
+    class UsuarioUseCases,ProjetoUseCases,AtividadeUseCases,RelatorioUseCases,UsuarioDTO,ProjetoDTO,AtividadeDTO,AuthService,EmailService,RelatorioService,ValidationService,ApiResponse mvp1Application
+    class AppDbContext,UsuarioRepository,ProjetoRepository,AtividadeRepository,EmailProvider,FileService,JwtService,EncryptionService mvp1Infrastructure
+    class AuthController,UsuarioController,ProjetoController,AtividadeController,RelatorioController,AuthMiddleware,ExceptionMiddleware,AuthorizeFilter,ValidationFilter mvp1Api
+    class LoginForm,MainForm,ProjetoForm,AtividadeForm,RelatorioForm,UsuarioForm,ApiService mvp1WinForms
+    
+    %% MVP 2 - Observabilidade
+    class AuditEntry,LogEntry,MetricEntry,SerializationOptions,AlertRule,ClientMetric,LoggableResult,LoggableNotificationResult mvp2Observability
+    class IAppLogger,ISerializationService,IMetricsService,IAuditService,ErrorDTO,WarningDTO,SuccessDTO,DashboardDataDTO,HealthCheckResultDTO,UseCaseExtensions mvp2Enhanced
+    class AppLogger,SerializationService,MetricsService,PrometheusMetricsCollector,AuditService,HealthCheckService,DashboardService,SystemMonitor,ServiceRegistration mvp2Monitoring
+    class MetricsController,HealthController,AuditController,InstrumentationMiddleware,NotificationMiddleware,ApplicationBuilderExtensions,ServiceCollectionExtensions mvp2Monitoring
+    class DashboardForm,LogViewerForm,AuditTrailForm,FormService,NotificationService,WinFormsMetricsService,WinFormsLogger,FormExtensions,ControlExtensions mvp2Enhanced
+    
+    %% Patterns
+    class NotificationResult,Error,Warning,Success,Result,ResultList patternClass
