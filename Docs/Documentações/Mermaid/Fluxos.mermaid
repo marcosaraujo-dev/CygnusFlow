@@ -1,0 +1,118 @@
+graph TD
+    subgraph "🔐 FLUXO DE AUTENTICAÇÃO"
+        A1[WinForms: LoginForm] --> A2[API: AuthController.Login]
+        A2 --> A3[Application: LoginUseCase]
+        A3 --> A4[Domain: UsuarioService.ValidarSenha]
+        A4 --> A5[Infrastructure: UsuarioRepository]
+        A5 --> A6[Infrastructure: JwtService.GenerateToken]
+        A6 --> A7[Retorna JWT Token]
+        A7 --> A8[WinForms: Armazena Token e Abre MainForm]
+    end
+    
+    subgraph "📁 FLUXO DE CRIAÇÃO DE PROJETO"
+        B1[WinForms: ProjetoForm] --> B2[Validação Client-Side]
+        B2 --> B3[API: ProjetoController.Post]
+        B3 --> B4[Middleware: AuthMiddleware]
+        B4 --> B5[Application: CriarProjetoUseCase]
+        B5 --> B6[Domain: ProjetoService.ValidarPrazos]
+        B6 --> B7[Domain: CodigoProjeto.GerarProximoCodigo]
+        B7 --> B8[Infrastructure: ProjetoRepository.CreateAsync]
+        B8 --> B9[Infrastructure: AppDbContext.SaveChanges]
+        B9 --> B10[Retorna ProjetoResponseDTO]
+        B10 --> B11[WinForms: Atualiza Interface]
+    end
+    
+    subgraph "📋 FLUXO DE CRIAÇÃO DE ATIVIDADE"
+        C1[WinForms: AtividadeForm] --> C2[Validação Client-Side]
+        C2 --> C3[API: AtividadeController.Post]
+        C3 --> C4[Middleware: AuthMiddleware]
+        C4 --> C5[Application: CriarAtividadeUseCase]
+        C5 --> C6[Domain: Validar Projeto Existe]
+        C6 --> C7[Domain: Validar Usuário Ativo]
+        C7 --> C8[Domain: CodigoAtividade.GerarProximoCodigo]
+        C8 --> C9[Infrastructure: AtividadeRepository.CreateAsync]
+        C9 --> C10[Infrastructure: AppDbContext.SaveChanges]
+        C10 --> C11[Retorna AtividadeResponseDTO]
+        C11 --> C12[WinForms: Atualiza Interface]
+    end
+    
+    subgraph "🔄 FLUXO DE REDEFINIÇÃO DE SENHA"
+        D1[WinForms: RedefinirSenhaForm] --> D2[Informa Email]
+        D2 --> D3[API: AuthController.SolicitarRedefinicao]
+        D3 --> D4[Application: RedefinirSenhaUseCase]
+        D4 --> D5[Domain: UsuarioService.GerarCodigoRedefinicao]
+        D5 --> D6[Infrastructure: UsuarioRepository.BloquearUsuario]
+        D6 --> D7[Infrastructure: EmailService.EnviarCodigo]
+        D7 --> D8[WinForms: Tela Inserir Código]
+        D8 --> D9[API: AuthController.ConfirmarRedefinicao]
+        D9 --> D10[Application: ValidarCodigo]
+        D10 --> D11[Domain: UsuarioService.AtualizarSenha]
+        D11 --> D12[Infrastructure: UsuarioRepository.DesbloquearUsuario]
+        D12 --> D13[WinForms: Retorna ao Login]
+    end
+    
+    subgraph "📊 FLUXO DE RELATÓRIOS"
+        E1[WinForms: RelatorioForm] --> E2[Seleciona Filtros]
+        E2 --> E3[API: RelatorioController.GerarGantt]
+        E3 --> E4[Application: GerarGanttUseCase]
+        E4 --> E5[Infrastructure: ProjetoRepository.GetByFiltros]
+        E5 --> E6[Infrastructure: AtividadeRepository.GetByProjetos]
+        E6 --> E7[Application: RelatorioService.ProcessarDados]
+        E7 --> E8[Application: RelatorioService.GerarGantt]
+        E8 --> E9[Infrastructure: FileService.ExportToPDF]
+        E9 --> E10[WinForms: Exibe Relatório]
+    end
+    
+    subgraph "👤 FLUXO DE GERENCIAMENTO DE USUÁRIOS"
+        F1[WinForms: UsuarioForm] --> F2[Verificar Permissão Admin]
+        F2 --> F3[API: UsuarioController.Post]
+        F3 --> F4[Filter: AuthorizeFilter Admin]
+        F4 --> F5[Application: CriarUsuarioUseCase]
+        F5 --> F6[Domain: UsuarioService.ValidarEmail]
+        F6 --> F7[Domain: UsuarioService.GerarSenhaHash]
+        F7 --> F8[Infrastructure: UsuarioRepository.CreateAsync]
+        F8 --> F9[Infrastructure: AppDbContext.SaveChanges]
+        F9 --> F10[Infrastructure: EmailService.EnviarBemVindo]
+        F10 --> F11[WinForms: Atualiza Lista Usuários]
+    end
+    
+    subgraph "🔍 FLUXO DE LISTAGEM COM FILTROS"
+        G1[WinForms: Qualquer Lista] --> G2[Aplicar Filtros]
+        G2 --> G3[API: Controller.GetByFiltros]
+        G3 --> G4[Application: ListarUseCase]
+        G4 --> G5[Infrastructure: Repository.GetByFiltros]
+        G5 --> G6[Infrastructure: AppDbContext.Query]
+        G6 --> G7[Retorna Lista DTOs]
+        G7 --> G8[WinForms: Popula DataGridView]
+    end
+    
+    subgraph "💬 FLUXO DE COMENTÁRIOS"
+        H1[WinForms: Tela Projeto/Atividade] --> H2[Adicionar Comentário]
+        H2 --> H3[API: Controller.AdicionarComentario]
+        H3 --> H4[Application: AdicionarComentarioUseCase]
+        H4 --> H5[Domain: Validar Usuário e Entidade]
+        H5 --> H6[Infrastructure: Repository.AdicionarComentario]
+        H6 --> H7[Infrastructure: AppDbContext.SaveChanges]
+        H7 --> H8[WinForms: Atualiza Lista Comentários]
+    end
+    
+    subgraph "⚡ FLUXO DE TRATAMENTO DE ERROS"
+        I1[Qualquer Operação] --> I2[Erro Ocorre]
+        I2 --> I3[API: ExceptionMiddleware]
+        I3 --> I4[Log do Erro]
+        I4 --> I5[Retorna Erro Padronizado]
+        I5 --> I6[WinForms: Exibe Mensagem Amigável]
+    end
+    
+    %% Estilos
+    classDef winformsNode fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef apiNode fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef applicationNode fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef domainNode fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef infrastructureNode fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    
+    class A1,A8,B1,B11,C1,C12,D1,D8,D13,E1,E10,F1,F11,G1,G8,H1,H8,I6 winformsNode
+    class A2,B3,C3,D3,D9,E3,F3,G3,H3,I3 apiNode
+    class A3,B5,C5,D4,D10,E4,F5,G4,H4 applicationNode
+    class A4,B6,B7,C6,C7,C8,D5,D11,F6,F7,H5 domainNode
+    class A5,A6,B8,B9,C9,C10,D6,D7,D12,E5,E6,E7,E8,E9,F8,F9,F10,G5,G6,H6,H7,I4 infrastructureNode
