@@ -18,6 +18,7 @@ namespace CygnusFlow.Domain.Interfaces.Repositories
         Task<Result<bool>> DeleteAsync(int id);
         Task<Result<bool>> ExisteCodigoAsync(string codigo, int? ignorarId = null);
         Task<Result<int>> GetProximoNumeroAsync();
+        Task<Result<Atividade>> GetAtividadeAtrasadaAsync(int id);
         Task<ResultList<Atividade>> GetAtividadesAtrasadasAsync();
         Task<ResultList<Atividade>> GetAtividadesPorPeriodoAsync(DateTime dataInicio, DateTime dataFim);
         Task<Result<int>> ContarAtividadesPorStatusAsync(int statusId);

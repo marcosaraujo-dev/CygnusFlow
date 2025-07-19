@@ -27,6 +27,7 @@ namespace CygnusFlow.Domain.Entities
         public string? Impedimentos { get; set; }
         public DateTime DataCadastro { get; set; } = DateTime.Now;
 
+
         public virtual Projeto Projeto { get; set; } = null!;
         public virtual Usuario Responsavel { get; set; } = null!;
         public virtual ICollection<AtividadeComentario> Comentarios { get; set; } = new List<AtividadeComentario>();

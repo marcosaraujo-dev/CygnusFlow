@@ -11,6 +11,8 @@
         public const string ALREADY_EXISTS = "ALREADY_EXISTS";
         public const string UNAUTHORIZED = "UNAUTHORIZED";
         public const string FORBIDDEN = "FORBIDDEN";
+        public const string INTERNAL_ERROR = "INTERNAL_ERROR";
+        public const string DATABASE_ERROR = "DATABASE_ERROR";
 
         // Códigos específicos de Projeto
         public const string PROJETO_CODIGO_DUPLICADO = "PROJETO_CODIGO_DUPLICADO";

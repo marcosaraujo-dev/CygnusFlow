@@ -1,5 +1,6 @@
 ﻿using CygnusFlow.Domain.DTOs;
 using CygnusFlow.Domain.Shared;
+using CygnusFlow.Domain.Specifications;
 using System.Threading.Tasks;
 
 namespace CygnusFlow.Domain.Interfaces.Infrastructure

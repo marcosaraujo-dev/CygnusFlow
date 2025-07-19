@@ -52,3 +52,4 @@ namespace CygnusFlow.Domain.ValueObjects
 
         public static implicit operator string(CodigoProjeto codigo) => codigo.Value;
     }
+}
