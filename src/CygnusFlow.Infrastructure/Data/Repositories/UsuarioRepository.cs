@@ -4,6 +4,7 @@ using CygnusFlow.Domain.Interfaces.Repositories;
 using CygnusFlow.Domain.Shared;
 using CygnusFlow.Domain.Specifications;
 using CygnusFlow.Infrastructure.Data.Context;
+using CygnusFlow.Infrastructure.Mappers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -26,13 +27,16 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                var usuario = await _context.Usuarios
+                var model = await _context.Usuarios
                     .Include(u => u.Equipe)
+                    .Include(u => u.TipoUsuario)
+                    .Include(u => u.StatusUsuario)
                     .FirstOrDefaultAsync(u => u.Id == id);
 
-                if (usuario == null)
+                if (model == null)
                     return Result<Usuario>.Failure("Id", ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND, "Usuário"));
 
+                var usuario = UsuarioMapper.ToDomain(model);
                 return Result<Usuario>.Success(usuario);
             }
             catch (Exception ex)
@@ -45,13 +49,16 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                var usuario = await _context.Usuarios
+                var model = await _context.Usuarios
                     .Include(u => u.Equipe)
+                    .Include(u => u.TipoUsuario)
+                    .Include(u => u.StatusUsuario)
                     .FirstOrDefaultAsync(u => u.Email == email);
 
-                if (usuario == null)
+                if (model == null)
                     return Result<Usuario>.Failure("Email", ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND, "Usuário"));
 
+                var usuario = UsuarioMapper.ToDomain(model);
                 return Result<Usuario>.Success(usuario);
             }
             catch (Exception ex)
@@ -66,6 +73,8 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
             {
                 var query = _context.Usuarios
                     .Include(u => u.Equipe)
+                    .Include(u => u.TipoUsuario)
+                    .Include(u => u.StatusUsuario)
                     .AsQueryable();
 
                 if (filtro != null)
@@ -80,20 +89,21 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
                         query = query.Where(u => u.EquipeId == filtro.EquipeId.Value);
 
                     if (filtro.TipoUsuarioId.HasValue)
-                        query = query.Where(u => (int)u.TipoUsuarioId == filtro.TipoUsuarioId.Value);
+                        query = query.Where(u => u.TipoUsuarioId == filtro.TipoUsuarioId.Value);
 
                     if (filtro.StatusUsuarioId.HasValue)
-                        query = query.Where(u => (int)u.StatusUsuarioId == filtro.StatusUsuarioId.Value);
+                        query = query.Where(u => u.StatusUsuarioId == filtro.StatusUsuarioId.Value);
                 }
 
                 var totalCount = await query.CountAsync();
 
-                var usuarios = await query
+                var models = await query
                     .OrderBy(u => u.Nome)
                     .Skip(((filtro?.Pagina ?? 1) - 1) * (filtro?.TamanhoPagina ?? 50))
                     .Take(filtro?.TamanhoPagina ?? 50)
                     .ToListAsync();
 
+                var usuarios = models.Select(UsuarioMapper.ToDomain).ToList();
                 return ResultList<Usuario>.Success(usuarios, totalCount);
             }
             catch (Exception ex)
@@ -108,8 +118,13 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                _context.Usuarios.Add(usuario);
+                var model = UsuarioMapper.ToModel(usuario);
+                _context.Usuarios.Add(model);
                 await _context.SaveChangesAsync();
+
+                // Atualizar entidade com ID gerado
+                usuario.Id = model.Id;
+
                 return Result<Usuario>.Success(usuario);
             }
             catch (Exception ex)
@@ -122,8 +137,13 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                _context.Usuarios.Update(usuario);
+                var model = await _context.Usuarios.FindAsync(usuario.Id);
+                if (model == null)
+                    return Result<Usuario>.Failure("Id", ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND, "Usuário"));
+
+                UsuarioMapper.UpdateModel(model, usuario);
                 await _context.SaveChangesAsync();
+
                 return Result<Usuario>.Success(usuario);
             }
             catch (Exception ex)
@@ -136,11 +156,11 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                var usuario = await _context.Usuarios.FindAsync(id);
-                if (usuario == null)
+                var model = await _context.Usuarios.FindAsync(id);
+                if (model == null)
                     return Result<bool>.Failure("Id", ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND, "Usuário"));
 
-                _context.Usuarios.Remove(usuario);
+                _context.Usuarios.Remove(model);
                 await _context.SaveChangesAsync();
                 return Result<bool>.Success(true);
             }
@@ -168,19 +188,69 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
             }
         }
 
-        public Task<Result<bool>> AlterarSenhaAsync(int usuarioId, string novaSenhaHash)
+        public async Task<Result<bool>> AlterarSenhaAsync(int usuarioId, string novaSenhaHash)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var model = await _context.Usuarios.FindAsync(usuarioId);
+                if (model == null)
+                    return Result<bool>.Failure("Id", ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND, "Usuário"));
+
+                model.SenhaHash = novaSenhaHash;
+                await _context.SaveChangesAsync();
+
+                return Result<bool>.Success(true);
+            }
+            catch (Exception ex)
+            {
+                return Result<bool>.Failure("Database", $"Erro ao alterar senha: {ex.Message}");
+            }
         }
 
-        public Task<ResultList<Usuario>> GetByEquipeAsync(int equipeId)
+        public async Task<ResultList<Usuario>> GetByEquipeAsync(int equipeId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var models = await _context.Usuarios
+                    .Include(u => u.Equipe)
+                    .Include(u => u.TipoUsuario)
+                    .Include(u => u.StatusUsuario)
+                    .Where(u => u.EquipeId == equipeId)
+                    .OrderBy(u => u.Nome)
+                    .ToListAsync();
+
+                var usuarios = models.Select(UsuarioMapper.ToDomain).ToList();
+                return ResultList<Usuario>.Success(usuarios);
+            }
+            catch (Exception ex)
+            {
+                var notification = new NotificationResult();
+                notification.AddError("Database", $"Erro ao buscar usuários por equipe: {ex.Message}");
+                return ResultList<Usuario>.Failure(notification);
+            }
         }
 
-        public Task<ResultList<Usuario>> GetByTipoAsync(int tipoUsuario)
+        public async Task<ResultList<Usuario>> GetByTipoAsync(int tipoUsuario)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var models = await _context.Usuarios
+                    .Include(u => u.Equipe)
+                    .Include(u => u.TipoUsuario)
+                    .Include(u => u.StatusUsuario)
+                    .Where(u => u.TipoUsuarioId == tipoUsuario)
+                    .OrderBy(u => u.Nome)
+                    .ToListAsync();
+
+                var usuarios = models.Select(UsuarioMapper.ToDomain).ToList();
+                return ResultList<Usuario>.Success(usuarios);
+            }
+            catch (Exception ex)
+            {
+                var notification = new NotificationResult();
+                notification.AddError("Database", $"Erro ao buscar usuários por tipo: {ex.Message}");
+                return ResultList<Usuario>.Failure(notification);
+            }
         }
     }
 }

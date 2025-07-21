@@ -4,37 +4,54 @@ GO
 -- Tabelas auxiliares
 CREATE TABLE Equipe (
     Id INT IDENTITY PRIMARY KEY,
-    Nome NVARCHAR(100) NOT NULL
+    Nome NVARCHAR(100) NOT NULL,
+	Descricao NVARCHAR(200) NULL DEFAULT '',
+	Ativo  bit Default 1
 );
 
 CREATE TABLE StatusUsuario (
     Id INT IDENTITY PRIMARY KEY,
-    Nome NVARCHAR(50) NOT NULL -- Ativo, Inativo, Bloqueado
+    Nome NVARCHAR(50) NOT NULL,
+	Descricao NVARCHAR(200) NULL DEFAULT '',
+	Ativo  bit Default 1-- Ativo, Inativo, Bloqueado
 );
 
 CREATE TABLE ModuloSistema (
     Id INT IDENTITY PRIMARY KEY,
-    Nome NVARCHAR(100) NOT NULL
+    Nome NVARCHAR(100) NOT NULL,
+	Descricao NVARCHAR(200) NULL DEFAULT '',
+	Ativo  bit Default 1
 );
 
 CREATE TABLE Criticidade (
     Id INT IDENTITY PRIMARY KEY,
-    Nome NVARCHAR(50) NOT NULL -- Alta, Média, Baixa
+    Nome NVARCHAR(50) NOT NULL, -- Alta, Média, Baixa
+	Descricao NVARCHAR(200) NULL DEFAULT '',
+	Cor NVARCHAR(7),
+	Nivel Int NOT NULL, -- 1 = Baixa, 2 = Média, 3 = Alta, 4 = Crítica
+	Ativo  bit Default 1
 );
 
 CREATE TABLE StatusProjeto (
     Id INT IDENTITY PRIMARY KEY,
-    Nome NVARCHAR(50) NOT NULL -- Planejado, Em Andamento, Concluído, Cancelado
+    Nome NVARCHAR(50) NOT NULL, -- Planejado, Em Andamento, Concluído, Cancelado
+	Descricao NVARCHAR(200) NULL DEFAULT '',
+	Ativo  bit Default 1
 );
 
 CREATE TABLE TipoAtividade (
     Id INT IDENTITY PRIMARY KEY,
-    Nome NVARCHAR(100) NOT NULL
+    Nome NVARCHAR(100) NOT NULL,
+	Descricao NVARCHAR(200) NULL DEFAULT '',
+	Cor NVARCHAR(7),
+	Ativo  bit Default 1
 );
 
 CREATE TABLE TipoUsuario (
     Id INT IDENTITY PRIMARY KEY,
-    Nome NVARCHAR(50) NOT NULL -- Admin, PO, Dev, Viewer
+    Nome NVARCHAR(50) NOT NULL, -- Admin, PO, Dev, Viewer
+	Descricao NVARCHAR(200) NULL DEFAULT '',
+	Ativo  bit Default 1
 );
 
 -- Tabela de usuários

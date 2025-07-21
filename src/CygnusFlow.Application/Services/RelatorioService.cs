@@ -49,8 +49,8 @@ namespace CygnusFlow.Application.Services
                 DataInicioPO = p.DataInicioPO,
                 DataFimPO = p.DataFimPO,
                 EstimativaHoras = p.EstimativaHoras,
-                EstaAtrasado = p.EstaAtrasado(),
-                DiasAtraso = p.EstaAtrasado() ? (DateTime.Now.Date - p.DataFimPO.Date).Days : 0,
+                EstaAtrasado = p.EstaAtrasado,
+                DiasAtraso = p.EstaAtrasado ? (DateTime.Now.Date - p.DataFimPO.Date).Days : 0,
                 DataCadastro = p.DataCadastro
             }).ToList();
 

@@ -10,6 +10,8 @@ namespace CygnusFlow.Domain.Specifications
         public int? StatusId { get; set; }
         public DateTime? DataInicio { get; set; }
         public DateTime? DataFim { get; set; }
+
+        public string Codigo { get; set; } = string.Empty;
         public bool? ApenasAtrasados { get; set; }
         public int Pagina { get; set; } = 1;
         public int TamanhoPagina { get; set; } = 50;

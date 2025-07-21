@@ -32,9 +32,9 @@ namespace CygnusFlow.Application.Services
 
             var dashboard = new DashboardDto
             {
-                ProjetosAtivos = projetos.Count(p => p.StatusProjetoId == StatusProjeto.EmAndamento),
-                ProjetosAtrasados = projetos.Count(p => p.EstaAtrasado()),
-                ProjetosConcluidos = projetos.Count(p => p.StatusProjetoId == StatusProjeto.Concluido),
+                ProjetosAtivos = projetos.Count(p => p.StatusProjetoId == (int) StatusProjeto.EmAndamento),
+                ProjetosAtrasados = projetos.Count(p => p.EstaAtrasado),
+                ProjetosConcluidos = projetos.Count(p => p.StatusProjetoId == (int) StatusProjeto.Concluido),
                 TotalProjetos = projetos.Count,
                 ProjetosRecentes = projetos
                     .OrderByDescending(p => p.DataCadastro)
@@ -46,16 +46,16 @@ namespace CygnusFlow.Application.Services
                         Nome = p.Nome,
                         StatusNome = p.StatusProjetoId.ToString(),
                         DataFimPO = p.DataFimPO,
-                        EstaAtrasado = p.EstaAtrasado()
+                        EstaAtrasado = p.EstaAtrasado
                     }).ToList()
             };
 
             // Calcular porcentagem de entregas no prazo
-            var projetosConcluidos = projetos.Where(p => p.StatusProjetoId == StatusProjeto.Concluido).ToList();
+            var projetosConcluidos = projetos.Where(p => p.StatusProjetoId == (int) StatusProjeto.Concluido).ToList();
             if (projetosConcluidos.Any())
             {
                 dashboard.PercentualNoPrazo = Math.Round(
-                    (double)projetosConcluidos.Count(p => !p.EstaAtrasado()) / projetosConcluidos.Count * 100, 1);
+                    (double)projetosConcluidos.Count(p => !p.EstaAtrasado) / projetosConcluidos.Count * 100, 1);
             }
 
             return Result<DashboardDto>.Success(dashboard);

@@ -4,6 +4,7 @@ using CygnusFlow.Domain.Interfaces.Repositories;
 using CygnusFlow.Domain.Shared;
 using CygnusFlow.Domain.Specifications;
 using CygnusFlow.Infrastructure.Data.Context;
+using CygnusFlow.Infrastructure.Mappers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -24,14 +25,19 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                var atividade = await _context.Atividades
+                var model = await _context.Atividades
                     .Include(a => a.Projeto)
                     .Include(a => a.Responsavel)
+                    .Include(a => a.TipoAtividade)
+                    .Include(a => a.StatusProjeto)
+                    .Include(a => a.Comentarios)
+                        .ThenInclude(c => c.Usuario)
                     .FirstOrDefaultAsync(a => a.Id == id);
 
-                if (atividade == null)
+                if (model == null)
                     return Result<Atividade>.Failure("Id", ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND, "Atividade"));
 
+                var atividade = AtividadeMapper.ToDomain(model);
                 return Result<Atividade>.Success(atividade);
             }
             catch (Exception ex)
@@ -44,14 +50,17 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                var atividade = await _context.Atividades
+                var model = await _context.Atividades
                     .Include(a => a.Projeto)
                     .Include(a => a.Responsavel)
+                    .Include(a => a.TipoAtividade)
+                    .Include(a => a.StatusProjeto)
                     .FirstOrDefaultAsync(a => a.Codigo == codigo);
 
-                if (atividade == null)
+                if (model == null)
                     return Result<Atividade>.Failure("Codigo", ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND, "Atividade"));
 
+                var atividade = AtividadeMapper.ToDomain(model);
                 return Result<Atividade>.Success(atividade);
             }
             catch (Exception ex)
@@ -64,12 +73,15 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                var atividades = await _context.Atividades
+                var models = await _context.Atividades
                     .Include(a => a.Responsavel)
+                    .Include(a => a.TipoAtividade)
+                    .Include(a => a.StatusProjeto)
                     .Where(a => a.ProjetoId == projetoId)
                     .OrderByDescending(a => a.DataCadastro)
                     .ToListAsync();
 
+                var atividades = models.Select(AtividadeMapper.ToDomain).ToList();
                 return ResultList<Atividade>.Success(atividades);
             }
             catch (Exception ex)
@@ -84,12 +96,15 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                var atividades = await _context.Atividades
+                var models = await _context.Atividades
                     .Include(a => a.Projeto)
+                    .Include(a => a.TipoAtividade)
+                    .Include(a => a.StatusProjeto)
                     .Where(a => a.ResponsavelId == responsavelId)
                     .OrderByDescending(a => a.DataCadastro)
                     .ToListAsync();
 
+                var atividades = models.Select(AtividadeMapper.ToDomain).ToList();
                 return ResultList<Atividade>.Success(atividades);
             }
             catch (Exception ex)
@@ -107,6 +122,8 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
                 var query = _context.Atividades
                     .Include(a => a.Projeto)
                     .Include(a => a.Responsavel)
+                    .Include(a => a.TipoAtividade)
+                    .Include(a => a.StatusProjeto)
                     .AsQueryable();
 
                 // Aplicar filtros
@@ -120,10 +137,10 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
                     query = query.Where(a => a.ResponsavelId == filtros.ResponsavelId.Value);
 
                 if (filtros.TipoAtividadeId.HasValue)
-                    query = query.Where(a => (int)a.TipoAtividadeId == filtros.TipoAtividadeId.Value);
+                    query = query.Where(a => a.TipoAtividadeId == filtros.TipoAtividadeId.Value);
 
                 if (filtros.StatusId.HasValue)
-                    query = query.Where(a => (int)a.StatusProjetoId == filtros.StatusId.Value);
+                    query = query.Where(a => a.StatusProjetoId == filtros.StatusId.Value);
 
                 if (filtros.DataInicio.HasValue)
                     query = query.Where(a => a.DataInicioPlanejada >= filtros.DataInicio.Value);
@@ -131,10 +148,11 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
                 if (filtros.DataFim.HasValue)
                     query = query.Where(a => a.DataFimPlanejada <= filtros.DataFim.Value);
 
-                var atividades = await query
+                var models = await query
                     .OrderByDescending(a => a.DataCadastro)
                     .ToListAsync();
 
+                var atividades = models.Select(AtividadeMapper.ToDomain).ToList();
                 return ResultList<Atividade>.Success(atividades);
             }
             catch (Exception ex)
@@ -142,23 +160,6 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
                 var notification = new NotificationResult();
                 notification.AddError("Database", $"Erro ao buscar atividades: {ex.Message}");
                 return ResultList<Atividade>.Failure(notification);
-            }
-        }
-        public async Task<Result<Atividade>> GetAtividadeAtrasadaAsync(int id)
-        {
-            try
-            {
-                var atividade = await _context.Atividades
-                    .Include(a => a.Projeto)
-                    .Include(a => a.Responsavel)
-                    .FirstOrDefaultAsync(a => a.Id == id && a.EstaAtrasada());
-                if (atividade == null)
-                    return Result<Atividade>.Failure("Id", ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND, "Atividade atrasada"));
-                return Result<Atividade>.Success(atividade);
-            }
-            catch (Exception ex)
-            {
-                return Result<Atividade>.Failure("Database", $"Erro ao buscar atividade atrasada: {ex.Message}");
             }
         }
 
@@ -200,13 +201,19 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                var atividades = await _context.Atividades
+                var hoje = DateTime.Now.Date;
+                var models = await _context.Atividades
                     .Include(a => a.Projeto)
                     .Include(a => a.Responsavel)
-                    .Where(a => a.EstaAtrasada())
+                    .Include(a => a.TipoAtividade)
+                    .Include(a => a.StatusProjeto)
+                    .Where(a => a.DataFimPlanejada.HasValue &&
+                               a.DataFimPlanejada.Value < hoje &&
+                               a.StatusProjetoId != 3) // 3 = Concluído
                     .OrderByDescending(a => a.DataCadastro)
                     .ToListAsync();
 
+                var atividades = models.Select(AtividadeMapper.ToDomain).ToList();
                 return ResultList<Atividade>.Success(atividades);
             }
             catch (Exception ex)
@@ -221,15 +228,18 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                var atividades = await _context.Atividades
+                var models = await _context.Atividades
                     .Include(a => a.Projeto)
                     .Include(a => a.Responsavel)
+                    .Include(a => a.TipoAtividade)
+                    .Include(a => a.StatusProjeto)
                     .Where(a =>
                         (a.DataInicioPlanejada >= dataInicio && a.DataInicioPlanejada <= dataFim) ||
                         (a.DataFimPlanejada >= dataInicio && a.DataFimPlanejada <= dataFim))
                     .OrderByDescending(a => a.DataCadastro)
                     .ToListAsync();
 
+                var atividades = models.Select(AtividadeMapper.ToDomain).ToList();
                 return ResultList<Atividade>.Success(atividades);
             }
             catch (Exception ex)
@@ -244,14 +254,13 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                var count = await _context.Atividades.CountAsync(a => (int)a.StatusProjetoId == statusId);
+                var count = await _context.Atividades.CountAsync(a => a.StatusProjetoId == statusId);
                 return Result<int>.Success(count);
             }
             catch (Exception ex)
             {
                 return Result<int>.Failure("Database", $"Erro ao contar atividades por status: {ex.Message}");
             }
-
         }
 
         public async Task<Result<Atividade>> CreateAsync(Atividade atividade)
@@ -259,11 +268,21 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
             try
             {
                 var validation = atividade.Validate();
-                if (validation.Errors.Any())
-                    return Result<Atividade>.Failure("DataBase", ErrorMessages.GetMessage(ErrorCodes.DATABASE_ERROR, "Atividade"));
+                if (!validation.IsValid)
+                    return Result<Atividade>.Failure(validation);
 
-                await _context.Atividades.AddAsync(atividade);
+                var model = AtividadeMapper.ToModel(atividade);
+                _context.Atividades.Add(model);
                 await _context.SaveChangesAsync();
+
+                // Atualizar entidade com ID gerado
+                atividade.CarregarDados(
+                    model.Id, atividade.Codigo, atividade.Nome, atividade.ProjetoId,
+                    atividade.ResponsavelId, atividade.TipoAtividadeId, atividade.DataInicioPlanejada,
+                    atividade.DataFimPlanejada, atividade.DataInicioReal, atividade.DataFimReal,
+                    atividade.StatusProjetoId, atividade.Observacoes, atividade.Impedimentos,
+                    atividade.DataCadastro
+                );
 
                 return Result<Atividade>.Success(atividade);
             }
@@ -273,20 +292,19 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
             }
         }
 
-
         public async Task<Result<Atividade>> UpdateAsync(Atividade atividade)
         {
             try
             {
                 var validation = atividade.Validate();
-                if (validation.Errors.Any())
+                if (!validation.IsValid)
                     return Result<Atividade>.Failure(validation);
 
-                var existing = await _context.Atividades.FindAsync(atividade.Id);
-                if (existing == null)
+                var model = await _context.Atividades.FindAsync(atividade.Id);
+                if (model == null)
                     return Result<Atividade>.Failure("Id", ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND, "Atividade"));
 
-                _context.Entry(existing).CurrentValues.SetValues(atividade);
+                AtividadeMapper.UpdateModel(model, atividade);
                 await _context.SaveChangesAsync();
 
                 return Result<Atividade>.Success(atividade);
@@ -301,11 +319,11 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
         {
             try
             {
-                var atividade = await _context.Atividades.FindAsync(id);
-                if (atividade == null)
+                var model = await _context.Atividades.FindAsync(id);
+                if (model == null)
                     return Result<bool>.Failure("Id", ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND, "Atividade"));
 
-                _context.Atividades.Remove(atividade);
+                _context.Atividades.Remove(model);
                 await _context.SaveChangesAsync();
 
                 return Result<bool>.Success(true);
@@ -316,5 +334,31 @@ namespace CygnusFlow.Infrastructure.Data.Repositories
             }
         }
 
+        public async Task<Result<Atividade>> GetAtividadeAtrasadaAsync(int id)
+        {
+            try
+            {
+                var hoje = DateTime.Now.Date;
+                var model = await _context.Atividades
+                    .Include(a => a.Projeto)
+                    .Include(a => a.Responsavel)
+                    .Include(a => a.TipoAtividade)
+                    .Include(a => a.StatusProjeto)
+                    .FirstOrDefaultAsync(a => a.Id == id &&
+                                            a.DataFimPlanejada.HasValue &&
+                                            a.DataFimPlanejada.Value < hoje &&
+                                            a.StatusProjetoId != 3);
+
+                if (model == null)
+                    return Result<Atividade>.Failure("Id", ErrorMessages.GetMessage(ErrorCodes.NOT_FOUND, "Atividade atrasada"));
+
+                var atividade = AtividadeMapper.ToDomain(model);
+                return Result<Atividade>.Success(atividade);
+            }
+            catch (Exception ex)
+            {
+                return Result<Atividade>.Failure("Database", $"Erro ao buscar atividade atrasada: {ex.Message}");
+            }
+        }
     }
-    }
+}

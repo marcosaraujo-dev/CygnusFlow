@@ -1,27 +1,40 @@
 ﻿using CygnusFlow.Domain.Constants;
-using CygnusFlow.Domain.Enums;
 using CygnusFlow.Domain.Shared;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace CygnusFlow.Domain.Entities
 {
     public class Usuario
     {
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "Nome é obrigatório")]
+        [StringLength(255, MinimumLength = 2, ErrorMessage = "Nome deve ter entre 2 e 255 caracteres")]
         public string Nome { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email é obrigatório")]
+        [EmailAddress(ErrorMessage = "Email inválido")]
+        [StringLength(255, ErrorMessage = "Email deve ter no máximo 255 caracteres")]
         public string Email { get; set; } = string.Empty;
         public string SenhaHash { get; set; } = string.Empty;
         public int? EquipeId { get; set; }
-        public TipoUsuario TipoUsuarioId { get; set; }
-        public StatusUsuario StatusUsuarioId { get; set; }
+        public virtual Equipe? Equipe { get; set; }
+
+        public int TipoUsuarioId { get; set; }
+        public virtual TipoUsuario TipoUsuario { get; set; } = null!;
+
+        public int StatusUsuarioId { get; set; }
+        public virtual StatusUsuario StatusUsuario { get; set; } = null!;
         public bool BloqueadoPorRedefinicao { get; set; }
         public DateTime DataCadastro { get; set; } = DateTime.Now;
 
-        // Navigation properties
-        public virtual Equipe? Equipe { get; set; }
-        public virtual ICollection<Projeto> Projetos { get; set; } = new List<Projeto>();
-        public virtual ICollection<Atividade> Atividades { get; set; } = new List<Atividade>();
+        public virtual ICollection<Projeto> ProjetosResponsavel { get; set; } = new List<Projeto>();
+        public virtual ICollection<Atividade> AtividadesResponsavel { get; set; } = new List<Atividade>();
+        public virtual ICollection<ProjetoComentario> ProjetoComentarios { get; set; } = new List<ProjetoComentario>();
+        public virtual ICollection<AtividadeComentario> AtividadeComentarios { get; set; } = new List<AtividadeComentario>();
+
 
         public NotificationResult Validate()
         {

@@ -33,24 +33,25 @@ namespace CygnusFlow.Application.UseCases.Projetos
             if (!codigoResult.IsSuccess)
                 return Result<ProjetoResponseDto>.Failure(codigoResult.Notifications);
 
-            projeto.Codigo = codigoResult.Data.Value;
-
-            // 3. Validar entidade
-            var validationResult = projeto.Validate();
-            if (!validationResult.IsValid)
-                return Result<ProjetoResponseDto>.Failure(validationResult);
-
-            // 4. Verificar se código já existe
-            var existeCodigoResult = await _projetoRepository.ExisteCodigoAsync(projeto.Codigo);
+            // 3.Verificar se código já existe
+            var existeCodigoResult = await _projetoRepository.ExisteCodigoAsync(codigoResult.Data.Value);
             if (!existeCodigoResult.IsSuccess)
                 return Result<ProjetoResponseDto>.Failure(existeCodigoResult.Notifications);
 
             if (existeCodigoResult.Data)
             {
                 var notification = new NotificationResult();
-                notification.AddError(nameof(projeto.Codigo), "Código já existe", "CODIGO_DUPLICADO");
+                notification.AddError("Codigo", "Código já existe", "CODIGO_DUPLICADO");
                 return Result<ProjetoResponseDto>.Failure(notification);
             }
+
+            projeto.AlterarCodigo(codigoResult.Data.Value);
+        
+            // 4. Validar entidade
+            var validationResult = projeto.Validate();
+            if (!validationResult.IsValid)
+                return Result<ProjetoResponseDto>.Failure(validationResult);
+
 
             // 5. Salvar no repositório
             var saveResult = await _projetoRepository.CreateAsync(projeto);

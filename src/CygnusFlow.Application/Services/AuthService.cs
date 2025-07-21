@@ -34,7 +34,7 @@ namespace CygnusFlow.Application.Services
             var usuario = usuarioResult.Data;
 
             // Verificar se usuário está ativo
-            if (usuario.StatusUsuarioId != Domain.Enums.StatusUsuario.Ativo)
+            if (usuario.StatusUsuario.Id != (int)Domain.Enums.StatusUsuario.Ativo)
             {
                 var notification = new NotificationResult();
                 notification.AddError("Login", ErrorMessages.GetMessage(ErrorCodes.USUARIO_INATIVO),
